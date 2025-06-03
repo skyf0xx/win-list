@@ -54,4 +54,19 @@ export const categoryService = {
             },
         });
     },
+
+    // Update category
+    async update(
+        id: string,
+        data: Prisma.CategoryUpdateInput
+    ): Promise<Category> {
+        return prisma.category.update({
+            where: { id },
+            data,
+            include: {
+                profile: true,
+                tasks: true,
+            },
+        });
+    },
 };
