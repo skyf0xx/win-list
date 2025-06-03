@@ -50,4 +50,15 @@ export const profileService = {
             },
         });
     },
+
+    // Get all profiles
+    async getAll(): Promise<Profile[]> {
+        return prisma.profile.findMany({
+            include: {
+                user: true,
+                tasks: true,
+                categories: true,
+            },
+        });
+    },
 };
