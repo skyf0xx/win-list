@@ -32,4 +32,22 @@ export const profileService = {
             },
         });
     },
+
+    // Get all profiles for a user
+    async getByUserId(userId: string): Promise<Profile[]> {
+        return prisma.profile.findMany({
+            where: { userId },
+            include: {
+                tasks: {
+                    include: {
+                        category: true,
+                    },
+                },
+                categories: true,
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+        });
+    },
 };
