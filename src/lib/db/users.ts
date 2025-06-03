@@ -56,4 +56,11 @@ export const userService = {
             },
         });
     },
+
+    // Delete user
+    async delete(id: string): Promise<User> {
+        return prisma.user.delete({
+            where: { id },
+        });
+    },
 };
