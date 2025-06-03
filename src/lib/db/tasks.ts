@@ -196,4 +196,36 @@ export const taskService = {
             },
         });
     },
+
+    // Get tasks due today
+    async getTasksDueToday(profileId: string): Promise<Task[]> {
+        const today = new Date();
+        const startOfDay = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+        );
+        const endOfDay = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate() + 1
+        );
+
+        return prisma.task.findMany({
+            where: {
+                profileId,
+                dueDate: {
+                    gte: startOfDay,
+                    lt: endOfDay,
+                },
+            },
+            include: {
+                profile: true,
+                category: true,
+            },
+            orderBy: {
+                dueDate: 'asc',
+            },
+        });
+    },
 };
