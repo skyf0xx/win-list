@@ -27,4 +27,21 @@ export const categoryService = {
             },
         });
     },
+
+    // Get all categories for a profile
+    async getByProfileId(profileId: string): Promise<Category[]> {
+        return prisma.category.findMany({
+            where: { profileId },
+            include: {
+                tasks: {
+                    orderBy: {
+                        sortOrder: 'asc',
+                    },
+                },
+            },
+            orderBy: {
+                name: 'asc',
+            },
+        });
+    },
 };
