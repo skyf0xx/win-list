@@ -27,4 +27,24 @@ interface TaskSortOptions {
 }
 
 export const taskService = {
+    async create(data: Prisma.TaskCreateInput): Promise<Task> {
+        // Get the highest sort order for this profile and increment
+        const maxSortOrder = await prisma.task.aggregate({
+            where: { profileId: data.profile.connect?.id },
+            _max: { sortOrder: true },
+        });
+
+        const sortOrder = (maxSortOrder._max.sortOrder || 0) + 1;
+
+        return prisma.task.create({
+            data: {
+                ...data,
+                sortOrder,
+            },
+            include: {
+                profile: true,
+                category: true,
+            },
+        });
+    },
 };
