@@ -178,4 +178,22 @@ export const taskService = {
             },
         });
     },
+
+    // Get overdue tasks
+    async getOverdueTasks(profileId: string): Promise<Task[]> {
+        return prisma.task.findMany({
+            where: {
+                profileId,
+                dueDate: { lt: new Date() },
+                status: { not: 'COMPLETED' },
+            },
+            include: {
+                profile: true,
+                category: true,
+            },
+            orderBy: {
+                dueDate: 'asc',
+            },
+        });
+    },
 };
