@@ -12,4 +12,19 @@ export const categoryService = {
             },
         });
     },
+
+    // Get category by ID
+    async getById(id: string): Promise<Category | null> {
+        return prisma.category.findUnique({
+            where: { id },
+            include: {
+                profile: true,
+                tasks: {
+                    orderBy: {
+                        sortOrder: 'asc',
+                    },
+                },
+            },
+        });
+    },
 };
