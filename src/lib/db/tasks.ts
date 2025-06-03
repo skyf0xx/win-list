@@ -133,4 +133,36 @@ export const taskService = {
         });
     },
 
+    // Search tasks across all profiles for a user
+    async searchTasks(
+        userId: string,
+        searchTerm: string,
+        filters?: Omit<TaskFilters, 'search'>
+    ): Promise<Task[]> {
+        return prisma.task.findMany({
+            where: {
+                profile: { userId },
+                OR: [
+                    { title: { contains: searchTerm, mode: 'insensitive' } },
+                    {
+                        description: {
+                            contains: searchTerm,
+                            mode: 'insensitive',
+                        },
+                    },
+                ],
+                ...(filters?.status && { status: filters.status }),
+                ...(filters?.categoryId && { categoryId: filters.categoryId }),
+                ...(filters?.priority && { priority: filters.priority }),
+            },
+            include: {
+                profile: true,
+                category: true,
+            },
+            orderBy: {
+                updatedAt: 'desc',
+            },
+        });
+    },
+
 };
