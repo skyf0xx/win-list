@@ -36,4 +36,13 @@ export const userService = {
             },
         });
     },
+
+    // Get all users
+    async getAll(): Promise<User[]> {
+        return prisma.user.findMany({
+            include: {
+                profiles: true,
+            },
+        });
+    },
 };
