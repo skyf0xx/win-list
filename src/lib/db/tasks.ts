@@ -118,4 +118,19 @@ export const taskService = {
             ...(offset && { skip: offset }),
         });
     },
+
+    // Get all tasks for a category
+    async getByCategoryId(categoryId: string): Promise<Task[]> {
+        return prisma.task.findMany({
+            where: { categoryId },
+            include: {
+                profile: true,
+                category: true,
+            },
+            orderBy: {
+                sortOrder: 'asc',
+            },
+        });
+    },
+
 };
