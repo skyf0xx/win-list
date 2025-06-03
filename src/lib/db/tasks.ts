@@ -252,4 +252,18 @@ export const taskService = {
             },
         });
     },
+
+    // Bulk update task order (for drag and drop)
+    async updateTaskOrder(
+        taskUpdates: { id: string; sortOrder: number }[]
+    ): Promise<void> {
+        await prisma.$transaction(
+            taskUpdates.map(({ id, sortOrder }) =>
+                prisma.task.update({
+                    where: { id },
+                    data: { sortOrder },
+                })
+            )
+        );
+    },
 };
