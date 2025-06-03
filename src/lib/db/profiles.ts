@@ -13,4 +13,23 @@ export const profileService = {
             },
         });
     },
+
+    // Get profile by ID
+    async getById(id: string): Promise<Profile | null> {
+        return prisma.profile.findUnique({
+            where: { id },
+            include: {
+                user: true,
+                tasks: {
+                    include: {
+                        category: true,
+                    },
+                    orderBy: {
+                        sortOrder: 'asc',
+                    },
+                },
+                categories: true,
+            },
+        });
+    },
 };
