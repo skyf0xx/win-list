@@ -69,4 +69,11 @@ export const categoryService = {
             },
         });
     },
+
+    // Delete category
+    async delete(id: string): Promise<Category> {
+        return prisma.category.delete({
+            where: { id },
+        });
+    },
 };
