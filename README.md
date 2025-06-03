@@ -21,3 +21,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Notes
 
 Database service used (postgres) is [NeonDB](https://neon.com/)
+
+## Environment variables
+
+.env variables:
+DATABASE_URL=postgresql://xxxxxx:xxxxxx@xxxxx.neondb?sslmode=require
