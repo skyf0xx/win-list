@@ -47,4 +47,15 @@ export const taskService = {
             },
         });
     },
+
+    // Get task by ID
+    async getById(id: string): Promise<Task | null> {
+        return prisma.task.findUnique({
+            where: { id },
+            include: {
+                profile: true,
+                category: true,
+            },
+        });
+    },
 };
