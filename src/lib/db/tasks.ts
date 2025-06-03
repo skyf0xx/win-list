@@ -165,4 +165,17 @@ export const taskService = {
         });
     },
 
+    // Get tasks by status
+    async getByStatus(profileId: string, status: TaskStatus): Promise<Task[]> {
+        return prisma.task.findMany({
+            where: { profileId, status },
+            include: {
+                profile: true,
+                category: true,
+            },
+            orderBy: {
+                sortOrder: 'asc',
+            },
+        });
+    },
 };
