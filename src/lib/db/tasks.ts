@@ -240,4 +240,16 @@ export const taskService = {
             },
         });
     },
+
+    // Update task status
+    async updateStatus(id: string, status: TaskStatus): Promise<Task> {
+        return prisma.task.update({
+            where: { id },
+            data: { status },
+            include: {
+                profile: true,
+                category: true,
+            },
+        });
+    },
 };
