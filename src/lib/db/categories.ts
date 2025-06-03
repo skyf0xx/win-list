@@ -44,4 +44,14 @@ export const categoryService = {
             },
         });
     },
+
+    // Get all categories
+    async getAll(): Promise<Category[]> {
+        return prisma.category.findMany({
+            include: {
+                profile: true,
+                tasks: true,
+            },
+        });
+    },
 };
