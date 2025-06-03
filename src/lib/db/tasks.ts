@@ -273,4 +273,33 @@ export const taskService = {
             where: { id },
         });
     },
+
+    // Get task statistics for a profile
+    async getTaskStats(profileId: string) {
+        const stats = await prisma.task.groupBy({
+            by: ['status'],
+            where: { profileId },
+            _count: { status: true },
+        });
+
+        const overdue = await prisma.task.count({
+            where: {
+                profileId,
+                dueDate: { lt: new Date() },
+                status: { not: 'COMPLETED' },
+            },
+        });
+
+        return {
+            total: stats.reduce((sum, stat) => sum + stat._count.status, 0),
+            pending:
+                stats.find((s) => s.status === 'PENDING')?._count.status || 0,
+            inProgress:
+                stats.find((s) => s.status === 'IN_PROGRESS')?._count.status ||
+                0,
+            completed:
+                stats.find((s) => s.status === 'COMPLETED')?._count.status || 0,
+            overdue,
+        };
+    },
 };
