@@ -61,4 +61,20 @@ export const profileService = {
             },
         });
     },
+
+    // Update profile
+    async update(
+        id: string,
+        data: Prisma.ProfileUpdateInput
+    ): Promise<Profile> {
+        return prisma.profile.update({
+            where: { id },
+            data,
+            include: {
+                user: true,
+                tasks: true,
+                categories: true,
+            },
+        });
+    },
 };
