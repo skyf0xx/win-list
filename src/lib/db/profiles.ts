@@ -77,4 +77,11 @@ export const profileService = {
             },
         });
     },
+
+    // Delete profile
+    async delete(id: string): Promise<Profile> {
+        return prisma.profile.delete({
+            where: { id },
+        });
+    },
 };
