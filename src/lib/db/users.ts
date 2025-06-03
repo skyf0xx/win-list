@@ -26,4 +26,14 @@ export const userService = {
             },
         });
     },
+
+    // Get user by email
+    async getByEmail(email: string): Promise<User | null> {
+        return prisma.user.findUnique({
+            where: { email },
+            include: {
+                profiles: true,
+            },
+        });
+    },
 };
