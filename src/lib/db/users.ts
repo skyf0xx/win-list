@@ -45,4 +45,15 @@ export const userService = {
             },
         });
     },
+
+    // Update user
+    async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+        return prisma.user.update({
+            where: { id },
+            data,
+            include: {
+                profiles: true,
+            },
+        });
+    },
 };
