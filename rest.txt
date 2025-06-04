@@ -48,3 +48,45 @@ GET http://localhost:3000/api/profiles
 
 ### Get Profiles by User ID
 GET http://localhost:3000/api/profiles?userId=c20b6aa4-a5f8-4e51-af1c-5181a9918544
+
+### Get Tasks - Basic 
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&limit=5
+
+### Get Tasks - With Filters
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&status=PENDING&priority=HIGH&search=test
+
+### Get Tasks - With Date Range
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&dueDateFrom=2025-01-01&dueDateTo=2025-12-31
+
+### Get Tasks - With Sorting and Pagination
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&sortBy=dueDate&sortDirection=desc&limit=10&offset=0
+
+### Get Tasks - All Parameters
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&status=COMPLETED&categoryId=3f789f61-a067-4fcc-beb7-923da7efe655&priority=MEDIUM&search=important&dueDateFrom=2024-06-01&dueDateTo=2024-06-30&sortBy=priority&sortDirection=asc&limit=5&offset=10
+
+### Create Task - Basic
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+
+{
+  "profileId": "3f789f61-a067-4fcc-beb7-923da7efe655",
+  "title": "Test Task",
+  "description": "This is a test task",
+  "status": "PENDING",
+  "priority": "MEDIUM"
+}
+
+### Create Task - With Due Date
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+
+{
+  "profileId": "3f789f61-a067-4fcc-beb7-923da7efe655",
+  "title": "Task with Due Date",
+  "description": "This task has a due date",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "dueDate": "2025-12-31"
+}
+
+
