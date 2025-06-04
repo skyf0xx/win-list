@@ -94,7 +94,7 @@ POST http://localhost:3000/api/tasks
 Content-Type: application/json
 
 {
-  "profileId": "3f789f61-a067-4fcc-beb7-923da7efe655",
+  "profileId": "4fb5a03d-040b-4c3b-949b-dd648190b3a9",
   "title": "Task with Due Date",
   "description": "This task has a due date",
   "status": "PENDING",
@@ -136,6 +136,23 @@ Content-Type: application/json
       "sortOrder": 5
     }
   ]
+}
+
+
+### Get Task by ID
+GET http://localhost:3000/api/tasks/0b534d7c-5dcb-4b08-92d2-a6e9507b21ed
+Content-Type: application/json
+
+### Update Task by ID
+PUT http://localhost:3000/api/tasks/0b534d7c-5dcb-4b08-92d2-a6e9507b21ed
+Content-Type: application/json
+
+{
+  "title": "Updated Test Task",
+  "description": "This task has been updated",
+  "status": "IN_PROGRESS",
+  "priority": "HIGH",
+  "dueDate": "2025-12-25"
 }
 
 
