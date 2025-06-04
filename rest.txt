@@ -16,11 +16,11 @@ Content-Type: application/json
 GET http://localhost:3000/api/users
 
 ### Get User by ID
-GET http://localhost:3000/api/users/ea3814d6-07fb-4e93-9d08-042c4acc2bf8
+GET http://localhost:3000/api/users/5a531725-02d7-425c-8a7b-0abc4c26e852
 Content-Type: application/json
 
 ### Update User by ID
-PUT http://localhost:3000/api/users/ea3814d6-07fb-4e93-9d08-042c4acc2bf8
+PUT http://localhost:3000/api/users/5a531725-02d7-425c-8a7b-0abc4c26e852
 Content-Type: application/json
 
 {
@@ -29,6 +29,22 @@ Content-Type: application/json
 }
 
 ### Delete User by ID
-DELETE http://localhost:3000/api/users/ea3814d6-07fb-4e93-9d08-042c4acc2bf8
+DELETE http://localhost:3000/api/users/5a531725-02d7-425c-8a7b-0abc4c26e852
 Content-Type: application/json
 
+
+### Create Profile
+POST http://localhost:3000/api/profiles
+Content-Type: application/json
+
+{
+  "userId": "5a531725-02d7-425c-8a7b-0abc4c26e852",
+  "name": "My Profile",
+  "color": "#FF5733"
+}
+
+### Get All Profiles
+GET http://localhost:3000/api/profiles
+
+### Get Profiles by User ID
+GET http://localhost:3000/api/profiles?userId=5a531725-02d7-425c-8a7b-0abc4c26e852
