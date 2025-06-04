@@ -89,4 +89,38 @@ Content-Type: application/json
   "dueDate": "2025-12-31"
 }
 
+### Bulk Update Task Order - Basic Reordering
+POST http://localhost:3000/api/tasks/reorder
+Content-Type: application/json
 
+{
+  "taskUpdates": [
+    {
+      "id": "b33508dd-a215-4b4d-8708-5cd6733b41fd",
+      "sortOrder": 1
+    },
+    {
+      "id": "e76161f5-b6d5-4141-ac33-737c790a5335", 
+      "sortOrder": 2
+    },
+    {
+      "id": "ea4ce09c-3d62-4c69-8557-dc731fda3480",
+      "sortOrder": 3
+    }
+  ]
+}
+
+
+
+### Bulk Update Task Order - Single Task
+POST http://localhost:3000/api/tasks/reorder
+Content-Type: application/json
+
+{
+  "taskUpdates": [
+    {
+      "id": "b33508dd-a215-4b4d-8708-5cd6733b41fd",
+      "sortOrder": 5
+    }
+  ]
+}
