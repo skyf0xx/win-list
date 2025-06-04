@@ -17,6 +17,7 @@ const config: Config = {
     clearMocks: true,
     resetMocks: true,
     cache: false,
+    verbose: true,
 };
 
 export default createJestConfig(config);
