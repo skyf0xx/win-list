@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(createSuccessResponse(profiles));
     } catch (error: unknown) {
-        console.error('Error fetching profiles:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching profiles:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';
@@ -74,7 +75,8 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: unknown) {
-        console.error('Error creating profile:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error creating profile:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';
