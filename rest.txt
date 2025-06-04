@@ -152,3 +152,17 @@ Content-Type: application/json
   "color": "#3B82F6"
 }
 
+### Get Category by ID
+GET http://localhost:3000/api/categories/7eada113-db12-4b1e-b96e-075f4dd66d9c
+
+### Update Category by ID - Name Only
+PUT http://localhost:3000/api/categories/7eada113-db12-4b1e-b96e-075f4dd66d9c
+Content-Type: application/json
+
+{
+  "name": "Updated Work Category"
+}
+
+
+### Delete Category by ID
+DELETE http://localhost:3000/api/categories/7eada113-db12-4b1e-b96e-075f4dd66d9c
