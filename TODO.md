@@ -6,6 +6,7 @@ This is a list of features that I would like to add to this project in the futur
 -   [ ] Audit security (users should only be able to access their data)
 -   [ ] Add a production database
 -   [ ] Complete tests for all endpoints
+-   [ ] Replace console.log with logger for better logging
 -   [ ] Github actions to run tests/ check linting on push
 -   [ ] Update tasks sort order should be sequential (no skipping)
 -   [ ] Use NEST JS for scaling (big upgrade)
