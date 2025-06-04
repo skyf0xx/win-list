@@ -9,7 +9,13 @@ export const createTaskSchema = z.object({
     title: z.string().min(1, 'Task title is required').max(200),
     description: z.string().optional(),
     status: TaskStatusEnum.default('PENDING'),
-    dueDate: z.string().datetime().optional(),
+    dueDate: z
+        .string()
+        .date()
+        .transform((dateStr) => {
+            return `${dateStr}T00:00:00.000Z`;
+        })
+        .optional(),
     priority: PriorityEnum.default('MEDIUM'),
 });
 
@@ -18,7 +24,13 @@ export const updateTaskSchema = z.object({
     title: z.string().min(1, 'Task title is required').max(200).optional(),
     description: z.string().optional(),
     status: TaskStatusEnum.optional(),
-    dueDate: z.string().datetime().optional(),
+    dueDate: z
+        .string()
+        .date()
+        .transform((dateStr) => {
+            return `${dateStr}T00:00:00.000Z`;
+        })
+        .optional(),
     priority: PriorityEnum.optional(),
 });
 
@@ -31,8 +43,20 @@ export const taskFilterSchema = z.object({
     categoryId: z.string().uuid().optional(),
     priority: PriorityEnum.optional(),
     search: z.string().optional(),
-    dueDateFrom: z.string().datetime().optional(),
-    dueDateTo: z.string().datetime().optional(),
+    dueDateFrom: z
+        .string()
+        .date()
+        .transform((dateStr) => {
+            return `${dateStr}T00:00:00.000Z`;
+        })
+        .optional(),
+    dueDateTo: z
+        .string()
+        .date()
+        .transform((dateStr) => {
+            return `${dateStr}T00:00:00.000Z`;
+        })
+        .optional(),
 });
 
 export const taskSortSchema = z.object({
