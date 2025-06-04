@@ -12,10 +12,11 @@ const config: Config = {
         '^@/(.*)$': '<rootDir>/src/$1',
     },
     setupFilesAfterEnv: ['<rootDir>/__tests__/jest.setup.ts'],
-    testMatch: [
-        '**/__tests__/**/*.test.ts',
-        '**/__tests__/**/*.test.tsx',
-    ],
+    testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
+    maxWorkers: 1,
+    clearMocks: true,
+    resetMocks: true,
+    cache: false,
 };
 
 export default createJestConfig(config);
