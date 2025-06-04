@@ -137,3 +137,18 @@ Content-Type: application/json
     }
   ]
 }
+
+
+### Get Categories by Profile ID
+GET http://localhost:3000/api/categories?profileId=4fb5a03d-040b-4c3b-949b-dd648190b3a9
+
+### Create Category - Basic
+POST http://localhost:3000/api/categories
+Content-Type: application/json
+
+{
+  "profileId": "4fb5a03d-040b-4c3b-949b-dd648190b3a9",
+  "name": "Work",
+  "color": "#3B82F6"
+}
+
