@@ -76,6 +76,38 @@ describe('/api/users', () => {
                 },
             });
         });
+
+        it('should return users with their profiles', async () => {
+            // Create user with profiles
+            await prisma.user.create({
+                data: {
+                    email: faker.internet.email(),
+                    name: faker.person.fullName(),
+                    profiles: {
+                        create: [
+                            {
+                                name: 'Work Profile',
+                                color: '#3B82F6',
+                            },
+                        ],
+                    },
+                },
+            });
+
+            await testApiHandler({
+                appHandler: usersHandler,
+                test: async ({ fetch }) => {
+                    const response = await fetch({ method: 'GET' });
+                    const json = await response.json();
+
+                    expect(response.status).toBe(200);
+                    expect(json.success).toBe(true);
+                    expect(json.data).toHaveLength(1);
+                    expect(json.data[0].profiles).toHaveLength(1);
+                    expect(json.data[0].profiles[0].name).toBe('Work Profile');
+                },
+            });
+        });
     });
 
     describe('POST /api/users', () => {
@@ -101,6 +133,7 @@ describe('/api/users', () => {
                     expect(json.data.email).toBe(userData.email);
                     expect(json.data.name).toBe(userData.name);
                     expect(json.data.id).toBeDefined();
+                    expect(json.data.profiles).toEqual([]);
 
                     // Verify user was actually created in database
                     const dbUser = await prisma.user.findUnique({
@@ -108,6 +141,7 @@ describe('/api/users', () => {
                     });
                     expect(dbUser).toBeTruthy();
                     expect(dbUser?.email).toBe(userData.email);
+                    expect(dbUser?.name).toBe(userData.name);
                 },
             });
         });
@@ -205,6 +239,58 @@ describe('/api/users', () => {
                     expect(json.success).toBe(false);
                     expect(json.error).toBe('Validation failed');
                     expect(json.details?.name).toContain('Name is required');
+                },
+            });
+        });
+
+        it('should reject name that is too long', async () => {
+            const longName = 'a'.repeat(101); // 101 characters, exceeds 100 limit
+
+            await testApiHandler({
+                appHandler: usersHandler,
+                test: async ({ fetch }) => {
+                    const response = await fetch({
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: faker.internet.email(),
+                            name: longName,
+                        }),
+                    });
+                    const json = await response.json();
+
+                    expect(response.status).toBe(400);
+                    expect(json.success).toBe(false);
+                    expect(json.error).toBe('Validation failed');
+                    expect(json.details?.name).toContain(
+                        'at most 100 characters'
+                    );
+                },
+            });
+        });
+
+        it('should reject email that is too long', async () => {
+            const longEmail = 'a'.repeat(250) + '@example.com'; // Exceeds 255 limit
+
+            await testApiHandler({
+                appHandler: usersHandler,
+                test: async ({ fetch }) => {
+                    const response = await fetch({
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: longEmail,
+                            name: faker.person.fullName(),
+                        }),
+                    });
+                    const json = await response.json();
+
+                    expect(response.status).toBe(400);
+                    expect(json.success).toBe(false);
+                    expect(json.error).toBe('Validation failed');
+                    expect(json.details?.email).toContain(
+                        'at most 255 characters'
+                    );
                 },
             });
         });

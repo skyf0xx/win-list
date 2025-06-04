@@ -83,7 +83,13 @@ describe('/api/users/[id]', () => {
                     expect(json.success).toBe(true);
                     expect(json.data.id).toBe(user.id);
                     expect(json.data.profiles).toHaveLength(2);
-                    expect(json.data.profiles[0].name).toBe('Work Profile');
+
+                    // Check profile names (order might vary)
+                    const profileNames = json.data.profiles.map(
+                        (p: { name: string }) => p.name
+                    );
+                    expect(profileNames).toContain('Work Profile');
+                    expect(profileNames).toContain('Personal Profile');
                 },
             });
         });
@@ -164,9 +170,10 @@ describe('/api/users/[id]', () => {
         });
 
         it('should update user with partial data', async () => {
+            const originalEmail = faker.internet.email();
             const user = await prisma.user.create({
                 data: {
-                    email: faker.internet.email(),
+                    email: originalEmail,
                     name: 'Original Name',
                 },
             });
@@ -187,14 +194,14 @@ describe('/api/users/[id]', () => {
                     expect(response.status).toBe(200);
                     expect(json.success).toBe(true);
                     expect(json.data.name).toBe(updateData.name);
-                    expect(json.data.email).toBe(user.email); // Should remain unchanged
+                    expect(json.data.email).toBe(originalEmail); // Should remain unchanged
 
                     // Verify in database
                     const dbUser = await prisma.user.findUnique({
                         where: { id: user.id },
                     });
                     expect(dbUser?.name).toBe(updateData.name);
-                    expect(dbUser?.email).toBe(user.email);
+                    expect(dbUser?.email).toBe(originalEmail);
                 },
             });
         });
@@ -282,6 +289,33 @@ describe('/api/users/[id]', () => {
                 },
             });
         });
+
+        it('should reject empty name in update', async () => {
+            const user = await prisma.user.create({
+                data: {
+                    email: faker.internet.email(),
+                    name: faker.person.fullName(),
+                },
+            });
+
+            await testApiHandler({
+                appHandler: userByIdHandler,
+                params: { id: user.id },
+                test: async ({ fetch }) => {
+                    const response = await fetch({
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: '' }),
+                    });
+                    const json = await response.json();
+
+                    expect(response.status).toBe(400);
+                    expect(json.success).toBe(false);
+                    expect(json.error).toBe('Validation failed');
+                    expect(json.details?.name).toContain('Name is required');
+                },
+            });
+        });
     });
 
     describe('DELETE /api/users/[id]', () => {
@@ -358,10 +392,14 @@ describe('/api/users/[id]', () => {
                     const tasks = await prisma.task.findMany({
                         where: { profile: { userId: user.id } },
                     });
+                    const categories = await prisma.category.findMany({
+                        where: { profile: { userId: user.id } },
+                    });
 
                     expect(dbUser).toBeNull();
                     expect(profiles).toHaveLength(0);
                     expect(tasks).toHaveLength(0);
+                    expect(categories).toHaveLength(0);
                 },
             });
         });
