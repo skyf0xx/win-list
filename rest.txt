@@ -77,6 +77,28 @@ GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe6
 ### Get Tasks - All Parameters
 GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&status=COMPLETED&categoryId=3f789f61-a067-4fcc-beb7-923da7efe655&priority=MEDIUM&search=important&dueDateFrom=2024-06-01&dueDateTo=2024-06-30&sortBy=priority&sortDirection=asc&limit=5&offset=10
 
+### Search Tasks - Basic Search
+POST http://localhost:3000/api/tasks/search
+Content-Type: application/json
+
+{
+  "userId": "c20b6aa4-a5f8-4e51-af1c-5181a9918544",
+  "query": "test"
+}
+
+### Search Tasks - With Status Filter
+POST http://localhost:3000/api/tasks/search
+Content-Type: application/json
+
+{
+  "userId": "c20b6aa4-a5f8-4e51-af1c-5181a9918544",
+  "query": "test",
+  "filters": {
+    "status": "IN_PROGRESS"
+  }
+}
+
+
 ### Create Task - Basic
 POST http://localhost:3000/api/tasks
 Content-Type: application/json
