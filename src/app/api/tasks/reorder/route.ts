@@ -61,7 +61,8 @@ export async function POST(request: NextRequest) {
             )
         );
     } catch (error: unknown) {
-        console.error('Error updating task order:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error updating task order:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';

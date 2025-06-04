@@ -32,7 +32,8 @@ export async function GET(
 
         return NextResponse.json(createSuccessResponse(profileWithStats));
     } catch (error) {
-        console.error('Error fetching profile:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching profile:', error);
         return NextResponse.json(
             createErrorResponse('Failed to fetch profile'),
             { status: 500 }
@@ -96,7 +97,8 @@ export async function PUT(
             createSuccessResponse(profile, 'Profile updated successfully')
         );
     } catch (error) {
-        console.error('Error updating profile:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error updating profile:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';
@@ -127,7 +129,8 @@ export async function DELETE(
             createSuccessResponse(profile, 'Profile deleted successfully')
         );
     } catch (error) {
-        console.error('Error deleting profile:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error deleting profile:', error);
         return NextResponse.json(
             createErrorResponse('Failed to delete profile'),
             { status: 500 }

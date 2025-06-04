@@ -28,7 +28,8 @@ export async function GET(
 
         return NextResponse.json(createSuccessResponse(user));
     } catch (error) {
-        console.error('Error fetching user:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching user:', error);
         return NextResponse.json(createErrorResponse('Failed to fetch user'), {
             status: 500,
         });
@@ -68,7 +69,8 @@ export async function PUT(
             createSuccessResponse(user, 'User updated successfully')
         );
     } catch (error: unknown) {
-        console.error('Error updating user:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error updating user:', error);
 
         return NextResponse.json(createErrorResponse('Failed to update user'), {
             status: 500,
@@ -94,7 +96,8 @@ export async function DELETE(
             createSuccessResponse(user, 'User deleted successfully')
         );
     } catch (error: unknown) {
-        console.error('Error deleting user:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error deleting user:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';

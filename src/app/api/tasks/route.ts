@@ -125,7 +125,8 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(createSuccessResponse(tasks));
     } catch (error) {
-        console.error('Error fetching tasks:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching tasks:', error);
         return NextResponse.json(createErrorResponse('Failed to fetch tasks'), {
             status: 500,
         });
@@ -169,7 +170,8 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: unknown) {
-        console.error('Error creating task:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error creating task:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';
