@@ -2,6 +2,25 @@ import { prisma } from '../prisma';
 import type { Profile, Prisma } from '../../generated/prisma';
 
 export const profileService = {
+    // Check if profile name is unique for a user
+    async isNameUnique(
+        userId: string,
+        name: string,
+        excludeId?: string
+    ): Promise<boolean> {
+        const existingProfile = await prisma.profile.findFirst({
+            where: {
+                userId,
+                name: {
+                    equals: name.trim(),
+                    mode: 'insensitive', // Case-insensitive comparison
+                },
+                ...(excludeId && { id: { not: excludeId } }),
+            },
+        });
+
+        return !existingProfile;
+    },
     // Create a new profile
     async create(data: Prisma.ProfileCreateInput): Promise<Profile> {
         return prisma.profile.create({
