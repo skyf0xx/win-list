@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(createSuccessResponse(response));
     } catch (error) {
-        console.error('Error searching tasks:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error searching tasks:', error);
         return NextResponse.json(
             createErrorResponse('Failed to search tasks'),
             { status: 500 }
