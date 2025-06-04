@@ -2,6 +2,25 @@ import { prisma } from '../prisma';
 import type { Profile, Prisma } from '../../generated/prisma';
 
 export const profileService = {
+    // Check if profile name is unique for a user
+    async isNameUnique(
+        userId: string,
+        name: string,
+        excludeId?: string
+    ): Promise<boolean> {
+        const existingProfile = await prisma.profile.findFirst({
+            where: {
+                userId,
+                name: {
+                    equals: name.trim(),
+                    mode: 'insensitive', // Case-insensitive comparison
+                },
+                ...(excludeId && { id: { not: excludeId } }),
+            },
+        });
+
+        return !existingProfile;
+    },
     // Create a new profile
     async create(data: Prisma.ProfileCreateInput): Promise<Profile> {
         return prisma.profile.create({
@@ -51,6 +70,27 @@ export const profileService = {
         });
     },
 
+    // Get profile by user ID and name
+    async getByUserIdAndName(
+        userId: string,
+        name: string
+    ): Promise<Profile | null> {
+        return prisma.profile.findFirst({
+            where: {
+                userId,
+                name: {
+                    equals: name.trim(),
+                    mode: 'insensitive',
+                },
+            },
+            include: {
+                user: true,
+                tasks: true,
+                categories: true,
+            },
+        });
+    },
+
     // Get all profiles
     async getAll(): Promise<Profile[]> {
         return prisma.profile.findMany({
@@ -82,6 +122,13 @@ export const profileService = {
     async delete(id: string): Promise<Profile> {
         return prisma.profile.delete({
             where: { id },
+        });
+    },
+
+    // Get profile count for a user
+    async getCountByUserId(userId: string): Promise<number> {
+        return prisma.profile.count({
+            where: { userId },
         });
     },
 };
