@@ -13,7 +13,7 @@ const config: Config = {
     },
     setupFilesAfterEnv: ['<rootDir>/__tests__/jest.setup.ts'],
     testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
-    maxWorkers: 1,
+    maxWorkers: 1, // tests need to run sequentially e.g. add user before updating
     clearMocks: true,
     resetMocks: true,
     cache: false,
