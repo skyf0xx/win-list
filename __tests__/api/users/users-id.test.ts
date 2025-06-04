@@ -6,19 +6,23 @@ import * as userByIdHandler from '@/app/api/users/[id]/route';
 import { prisma } from '@/lib/db';
 import { faker } from '@faker-js/faker';
 
+// Helper function to clean database
+async function cleanDatabase() {
+    await prisma.task.deleteMany();
+    await prisma.category.deleteMany();
+    await prisma.profile.deleteMany();
+    await prisma.user.deleteMany();
+}
+
 describe('/api/users/[id]', () => {
+    // Clean database before each test to ensure isolation
     beforeEach(async () => {
-        await prisma.task.deleteMany();
-        await prisma.category.deleteMany();
-        await prisma.profile.deleteMany();
-        await prisma.user.deleteMany();
+        await cleanDatabase();
     });
 
+    // Clean up after all tests complete
     afterAll(async () => {
-        await prisma.task.deleteMany();
-        await prisma.category.deleteMany();
-        await prisma.profile.deleteMany();
-        await prisma.user.deleteMany();
+        await cleanDatabase();
         await prisma.$disconnect();
     });
 
