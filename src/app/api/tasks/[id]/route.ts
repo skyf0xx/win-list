@@ -5,6 +5,7 @@ import {
     createErrorResponse,
 } from '@/lib/validations/api';
 import { taskService } from '@/lib/db';
+import type { Prisma } from '@/generated/prisma';
 
 export async function GET(
     request: NextRequest,
@@ -62,15 +63,20 @@ export async function PUT(
             );
         }
 
-        // Prepare update data with proper relations
-        const updateData: any = {
-            ...validation.data,
+        const updateData: Prisma.TaskUpdateInput = {
+            ...(validation.data.title && { title: validation.data.title }),
+            ...(validation.data.description !== undefined && {
+                description: validation.data.description,
+            }),
+            ...(validation.data.status && { status: validation.data.status }),
+            ...(validation.data.priority && {
+                priority: validation.data.priority,
+            }),
             ...(validation.data.dueDate && {
                 dueDate: new Date(validation.data.dueDate),
             }),
         };
 
-        // Handle category relation
         if (validation.data.categoryId !== undefined) {
             if (validation.data.categoryId === null) {
                 updateData.category = { disconnect: true };
@@ -79,7 +85,6 @@ export async function PUT(
                     connect: { id: validation.data.categoryId },
                 };
             }
-            delete updateData.categoryId;
         }
 
         const task = await taskService.update(params.id, updateData);
