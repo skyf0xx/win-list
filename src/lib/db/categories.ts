@@ -1,5 +1,10 @@
 import { prisma } from '../prisma';
-import type { Category, Prisma } from '../../generated/prisma';
+import type { Category, Prisma, Profile, Task } from '../../generated/prisma';
+
+type CategoryWithRelations = Category & {
+    tasks: Task[];
+    profile: Profile;
+};
 
 export const categoryService = {
     // Create a new category
@@ -14,7 +19,7 @@ export const categoryService = {
     },
 
     // Get category by ID
-    async getById(id: string): Promise<Category | null> {
+    async getById(id: string): Promise<CategoryWithRelations | null> {
         return prisma.category.findUnique({
             where: { id },
             include: {
