@@ -29,7 +29,8 @@ export async function GET(
 
         return NextResponse.json(createSuccessResponse(task));
     } catch (error) {
-        console.error('Error fetching task:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching task:', error);
         return NextResponse.json(createErrorResponse('Failed to fetch task'), {
             status: 500,
         });
@@ -92,7 +93,8 @@ export async function PUT(
             createSuccessResponse(task, 'Task updated successfully')
         );
     } catch (error) {
-        console.error('Error updating task:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error updating task:', error);
         return NextResponse.json(createErrorResponse('Failed to update task'), {
             status: 500,
         });
@@ -117,7 +119,8 @@ export async function DELETE(
             createSuccessResponse(task, 'Task deleted successfully')
         );
     } catch (error) {
-        console.error('Error deleting task:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error deleting task:', error);
         return NextResponse.json(createErrorResponse('Failed to delete task'), {
             status: 500,
         });

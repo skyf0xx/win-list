@@ -34,7 +34,8 @@ export async function GET(
 
         return NextResponse.json(createSuccessResponse(categoryWithCount));
     } catch (error) {
-        console.error('Error fetching category:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching category:', error);
         return NextResponse.json(
             createErrorResponse('Failed to fetch category'),
             { status: 500 }
@@ -77,7 +78,8 @@ export async function PUT(
             createSuccessResponse(category, 'Category updated successfully')
         );
     } catch (error) {
-        console.error('Error updating category:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error updating category:', error);
         return NextResponse.json(
             createErrorResponse('Failed to update category'),
             { status: 500 }
@@ -103,7 +105,8 @@ export async function DELETE(
             createSuccessResponse(category, 'Category deleted successfully')
         );
     } catch (error) {
-        console.error('Error deleting category:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error deleting category:', error);
         return NextResponse.json(
             createErrorResponse('Failed to delete category'),
             { status: 500 }

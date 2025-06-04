@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(createSuccessResponse(categories));
     } catch (error) {
-        console.error('Error fetching categories:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching categories:', error);
         return NextResponse.json(
             createErrorResponse('Failed to fetch categories'),
             { status: 500 }
@@ -58,7 +59,8 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error) {
-        console.error('Error creating category:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error creating category:', error);
         return NextResponse.json(
             createErrorResponse('Failed to create category'),
             { status: 500 }

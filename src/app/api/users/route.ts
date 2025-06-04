@@ -11,7 +11,8 @@ export async function GET() {
         const users = await userService.getAll();
         return NextResponse.json(createSuccessResponse(users));
     } catch (error) {
-        console.error('Error fetching users:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error fetching users:', error);
         return NextResponse.json(createErrorResponse('Failed to fetch users'), {
             status: 500,
         });
@@ -41,7 +42,8 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: unknown) {
-        console.error('Error creating user:', error);
+        if (process.env.NODE_ENV !== 'test')
+            console.error('Error creating user:', error);
 
         const message =
             error instanceof Error ? error.message : 'Unknown error occurred';
