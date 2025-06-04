@@ -4,6 +4,7 @@ This is a list of features that I would like to add to this project in the futur
 
 -   [ ] Cleaner error responses from API. E.g. user already exists instead of generic responses
 -   [ ] Audit security
+-   [ ] Add a production database
 -   [ ] Github actions to run tests/ check linting on push
 -   [ ] Update tasks sort order should be sequential (no skipping)
 -   [ ] Use NEST JS for scaling (big upgrade)
