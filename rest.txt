@@ -43,8 +43,6 @@ Content-Type: application/json
   "color": "#FF5733"
 }
 
-### Get All Profiles
-GET http://localhost:3000/api/profiles
 
 ### Get Profiles by User ID
 GET http://localhost:3000/api/profiles?userId=c20b6aa4-a5f8-4e51-af1c-5181a9918544
