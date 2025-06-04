@@ -11,12 +11,14 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
 
-        let profiles;
-        if (userId) {
-            profiles = await profileService.getByUserId(userId);
-        } else {
-            profiles = await profileService.getAll();
+        if (!userId) {
+            return NextResponse.json(
+                createErrorResponse('userId is required'),
+                { status: 400 }
+            );
         }
+
+        const profiles = await profileService.getByUserId(userId);
 
         return NextResponse.json(createSuccessResponse(profiles));
     } catch (error: unknown) {
