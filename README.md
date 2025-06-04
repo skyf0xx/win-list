@@ -25,4 +25,4 @@ Database service used (postgres) is [NeonDB](https://neon.com/)
 ## Environment variables
 
 .env variables:
-DATABASE_URL=postgresql://xxxxxx:xxxxxx@xxxxx.neondb?sslmode=require
+See .env.example
