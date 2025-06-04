@@ -58,10 +58,15 @@ export const bulkUpdateTaskOrderSchema = z.object({
     ),
 });
 
-export const paginationSchema = z.object({
-    limit: z.string().regex(/^\d+$/).transform(Number).optional(),
-    offset: z.string().regex(/^\d+$/).transform(Number).optional(),
-});
+export const paginationSchema = z
+    .object({
+        limit: z.coerce.number().positive().optional(),
+        offset: z.coerce.number().min(0).optional(),
+    })
+    .transform((data) => ({
+        limit: data.limit || undefined,
+        offset: data.offset || undefined,
+    }));
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
