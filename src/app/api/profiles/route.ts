@@ -49,6 +49,18 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const { userId, name } = validation.data;
+
+        const isUnique = await profileService.isNameUnique(userId, name);
+        if (!isUnique) {
+            return NextResponse.json(
+                createErrorResponse('Profile name already exists', {
+                    name: 'A profile with this name already exists for this user',
+                }),
+                { status: 409 } // Conflict
+            );
+        }
+
         const profile = await profileService.create({
             user: { connect: { id: validation.data.userId } },
             name: validation.data.name,
