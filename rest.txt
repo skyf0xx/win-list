@@ -14,3 +14,21 @@ Content-Type: application/json
 
 ### Get All Users
 GET http://localhost:3000/api/users
+
+### Get User by ID
+GET http://localhost:3000/api/users/ea3814d6-07fb-4e93-9d08-042c4acc2bf8
+Content-Type: application/json
+
+### Update User by ID
+PUT http://localhost:3000/api/users/ea3814d6-07fb-4e93-9d08-042c4acc2bf8
+Content-Type: application/json
+
+{
+  "email": "updated@example.com",
+  "name": "Updated User"
+}
+
+### Delete User by ID
+DELETE http://localhost:3000/api/users/ea3814d6-07fb-4e93-9d08-042c4acc2bf8
+Content-Type: application/json
+
