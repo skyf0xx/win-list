@@ -17,5 +17,14 @@ export const updateProfileSchema = z.object({
         .optional(),
 });
 
+export const validateUniqueProfileName = z.object({
+    userId: z.string().uuid(),
+    name: z.string().min(1).max(50).trim(),
+    excludeId: z.string().uuid().optional(), // For updates, exclude current profile
+});
+
 export type CreateProfileInput = z.infer<typeof createProfileSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type ValidateUniqueProfileNameInput = z.infer<
+    typeof validateUniqueProfileName
+>;
