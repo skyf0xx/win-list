@@ -1,0 +1,207 @@
+Note: use this to quickly test routes while building:
+https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+Write the query below and CMD+SHIFT+P -> Rest Client Send request
+
+### Create User
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "name": "Test User"
+}
+
+### Get All Users
+GET http://localhost:3000/api/users
+
+### Get User by ID
+GET http://localhost:3000/api/users/c20b6aa4-a5f8-4e51-af1c-5181a9918544
+Content-Type: application/json
+
+### Update User by ID
+PUT http://localhost:3000/api/users/c20b6aa4-a5f8-4e51-af1c-5181a9918544
+Content-Type: application/json
+
+{
+  "email": "updated@example.com",
+  "name": "Updated User"
+}
+
+### Delete User by ID
+DELETE http://localhost:3000/api/users/c20b6aa4-a5f8-4e51-af1c-5181a9918544
+Content-Type: application/json
+
+
+### Create Profile
+POST http://localhost:3000/api/profiles
+Content-Type: application/json
+
+{
+  "userId": "c20b6aa4-a5f8-4e51-af1c-5181a9918544",
+  "name": "My Profile",
+  "color": "#FF5733"
+}
+
+
+### Get Profiles by User ID
+GET http://localhost:3000/api/profiles?userId=c20b6aa4-a5f8-4e51-af1c-5181a9918544
+
+### Get Profile by ID 
+GET http://localhost:3000/api/profiles/3f789f61-a067-4fcc-beb7-923da7efe655
+
+### Update Profile by ID - Name Only
+PUT http://localhost:3000/api/profiles/3f789f61-a067-4fcc-beb7-923da7efe655
+Content-Type: application/json
+
+{
+  "name": "Updated Profile Name"
+}
+
+
+### Delete Profile by ID
+DELETE http://localhost:3000/api/profiles/3f789f61-a067-4fcc-beb7-923da7efe655
+
+### Get Tasks - Basic 
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&limit=5
+
+### Get Tasks - With Filters
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&status=PENDING&priority=HIGH&search=test
+
+### Get Tasks - With Date Range
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&dueDateFrom=2025-01-01&dueDateTo=2025-12-31
+
+### Get Tasks - With Sorting and Pagination
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&sortBy=dueDate&sortDirection=desc&limit=10&offset=0
+
+### Get Tasks - All Parameters
+GET http://localhost:3000/api/tasks?profileId=3f789f61-a067-4fcc-beb7-923da7efe655&status=COMPLETED&categoryId=3f789f61-a067-4fcc-beb7-923da7efe655&priority=MEDIUM&search=important&dueDateFrom=2024-06-01&dueDateTo=2024-06-30&sortBy=priority&sortDirection=asc&limit=5&offset=10
+
+### Search Tasks - Basic Search
+POST http://localhost:3000/api/tasks/search
+Content-Type: application/json
+
+{
+  "userId": "c20b6aa4-a5f8-4e51-af1c-5181a9918544",
+  "query": "test"
+}
+
+### Search Tasks - With Status Filter
+POST http://localhost:3000/api/tasks/search
+Content-Type: application/json
+
+{
+  "userId": "c20b6aa4-a5f8-4e51-af1c-5181a9918544",
+  "query": "test",
+  "filters": {
+    "status": "IN_PROGRESS"
+  }
+}
+
+
+### Create Task - Basic
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+
+{
+  "profileId": "3f789f61-a067-4fcc-beb7-923da7efe655",
+  "title": "Test Task",
+  "description": "This is a test task",
+  "status": "PENDING",
+  "priority": "MEDIUM"
+}
+
+### Create Task - With Due Date
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+
+{
+  "profileId": "4fb5a03d-040b-4c3b-949b-dd648190b3a9",
+  "title": "Task with Due Date",
+  "description": "This task has a due date",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "dueDate": "2025-12-31"
+}
+
+### Bulk Update Task Order - Basic Reordering
+POST http://localhost:3000/api/tasks/reorder
+Content-Type: application/json
+
+{
+  "taskUpdates": [
+    {
+      "id": "b33508dd-a215-4b4d-8708-5cd6733b41fd",
+      "sortOrder": 1
+    },
+    {
+      "id": "e76161f5-b6d5-4141-ac33-737c790a5335", 
+      "sortOrder": 2
+    },
+    {
+      "id": "ea4ce09c-3d62-4c69-8557-dc731fda3480",
+      "sortOrder": 3
+    }
+  ]
+}
+
+
+
+### Bulk Update Task Order - Single Task
+POST http://localhost:3000/api/tasks/reorder
+Content-Type: application/json
+
+{
+  "taskUpdates": [
+    {
+      "id": "b33508dd-a215-4b4d-8708-5cd6733b41fd",
+      "sortOrder": 5
+    }
+  ]
+}
+
+
+### Get Task by ID
+GET http://localhost:3000/api/tasks/0b534d7c-5dcb-4b08-92d2-a6e9507b21ed
+Content-Type: application/json
+
+### Update Task by ID
+PUT http://localhost:3000/api/tasks/0b534d7c-5dcb-4b08-92d2-a6e9507b21ed
+Content-Type: application/json
+
+{
+  "title": "Updated Test Task",
+  "description": "This task has been updated",
+  "status": "IN_PROGRESS",
+  "priority": "HIGH",
+  "dueDate": "2025-12-25"
+}
+
+
+### Get Categories by Profile ID
+GET http://localhost:3000/api/categories?profileId=4fb5a03d-040b-4c3b-949b-dd648190b3a9
+
+### Create Category - Basic
+POST http://localhost:3000/api/categories
+Content-Type: application/json
+
+{
+  "profileId": "4fb5a03d-040b-4c3b-949b-dd648190b3a9",
+  "name": "Work",
+  "color": "#3B82F6"
+}
+
+### Get Category by ID
+GET http://localhost:3000/api/categories/7eada113-db12-4b1e-b96e-075f4dd66d9c
+
+### Update Category by ID - Name Only
+PUT http://localhost:3000/api/categories/7eada113-db12-4b1e-b96e-075f4dd66d9c
+Content-Type: application/json
+
+{
+  "name": "Updated Work Category"
+}
+
+
+### Delete Category by ID
+DELETE http://localhost:3000/api/categories/7eada113-db12-4b1e-b96e-075f4dd66d9c
