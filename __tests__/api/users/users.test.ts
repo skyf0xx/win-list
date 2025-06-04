@@ -258,12 +258,11 @@ describe('/api/users', () => {
                         }),
                     });
                     const json = await response.json();
-
                     expect(response.status).toBe(400);
                     expect(json.success).toBe(false);
                     expect(json.error).toBe('Validation failed');
                     expect(json.details?.name).toContain(
-                        'at most 100 characters'
+                        'at most 100 character'
                     );
                 },
             });
@@ -289,7 +288,7 @@ describe('/api/users', () => {
                     expect(json.success).toBe(false);
                     expect(json.error).toBe('Validation failed');
                     expect(json.details?.email).toContain(
-                        'at most 255 characters'
+                        'at most 255 character'
                     );
                 },
             });
