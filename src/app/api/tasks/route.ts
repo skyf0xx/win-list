@@ -77,11 +77,19 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Handle pagination with coerce
-        const paginationValidation = paginationSchema.safeParse({
-            limit: searchParams.get('limit'),
-            offset: searchParams.get('offset'),
-        });
+        const paginationParams: Record<string, string | null> = {};
+        const limitParam = searchParams.get('limit');
+        const offsetParam = searchParams.get('offset');
+
+        if (limitParam !== null) {
+            paginationParams.limit = limitParam;
+        }
+        if (offsetParam !== null) {
+            paginationParams.offset = offsetParam;
+        }
+
+        const paginationValidation =
+            paginationSchema.safeParse(paginationParams);
         if (!paginationValidation.success) {
             const details = paginationValidation.error.errors.reduce(
                 (acc, error) => {
