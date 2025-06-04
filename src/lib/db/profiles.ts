@@ -70,6 +70,27 @@ export const profileService = {
         });
     },
 
+    // Get profile by user ID and name
+    async getByUserIdAndName(
+        userId: string,
+        name: string
+    ): Promise<Profile | null> {
+        return prisma.profile.findFirst({
+            where: {
+                userId,
+                name: {
+                    equals: name.trim(),
+                    mode: 'insensitive',
+                },
+            },
+            include: {
+                user: true,
+                tasks: true,
+                categories: true,
+            },
+        });
+    },
+
     // Get all profiles
     async getAll(): Promise<Profile[]> {
         return prisma.profile.findMany({
@@ -101,6 +122,13 @@ export const profileService = {
     async delete(id: string): Promise<Profile> {
         return prisma.profile.delete({
             where: { id },
+        });
+    },
+
+    // Get profile count for a user
+    async getCountByUserId(userId: string): Promise<number> {
+        return prisma.profile.count({
+            where: { userId },
         });
     },
 };
