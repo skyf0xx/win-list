@@ -1,0 +1,16 @@
+Note: use this to quickly test routes while building:
+https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+Write the query below and CMD+SHIFT+P -> Rest Client Send request
+
+### Create User
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "name": "Test User"
+}
+
+### Get All Users
+GET http://localhost:3000/api/users
