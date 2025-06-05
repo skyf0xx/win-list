@@ -58,7 +58,19 @@ export function TaskForm({
                     ? format(new Date(initialData.dueDate), 'yyyy-MM-dd')
                     : '',
             });
+        } else {
+            // Reset form for new task
+            setFormData({
+                title: '',
+                description: '',
+                categoryId: '',
+                priority: 'MEDIUM',
+                status: 'PENDING',
+                dueDate: '',
+            });
         }
+        // Clear errors when initialData changes
+        setErrors({});
     }, [initialData]);
 
     const validateForm = () => {
