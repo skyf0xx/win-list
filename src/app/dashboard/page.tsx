@@ -13,6 +13,7 @@ import { useCategories } from '@/hooks/api';
 import { TaskModal } from '@/components/features/tasks/task-modal';
 import { TaskStatusSection } from '@/components/features/tasks/task-status-section';
 import { ProfileCreationModal } from '@/components/features/profiles/profile-creation-modal';
+import { redirect } from 'next/navigation';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -104,15 +105,7 @@ export default function Dashboard() {
 
     // Not authenticated
     if (status === 'unauthenticated' || !session) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <EmptyState
-                    type="general"
-                    title="Please sign in"
-                    description="You need to be signed in to access your tasks."
-                />
-            </div>
-        );
+        redirect('/');
     }
 
     // No profiles - show create first profile
