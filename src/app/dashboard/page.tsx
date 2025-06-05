@@ -95,42 +95,13 @@ export default function Dashboard() {
     };
 
     // Loading state
-    if (status === 'loading' || (session && profilesLoading)) {
+    if (status === 'loading' || profilesLoading) {
         return (
             <div className="min-h-screen bg-gray-50">
-                <div className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white">
-                    <div className="container mx-auto px-4 py-3">
-                        <div className="flex items-center gap-4">
-                            <LoadingSkeleton variant="profile" />
-                            <LoadingSkeleton
-                                variant="text"
-                                className="flex-1 max-w-md"
-                            />
-                            <LoadingSkeleton
-                                variant="circle"
-                                className="w-24 h-10"
-                            />
-                        </div>
-                    </div>
-                </div>
+                <LoadingSkeleton variant="header" />
                 <MainLayout>
                     <div className="space-y-6">
-                        {[1, 2, 3].map((i) => (
-                            <div
-                                key={i}
-                                className="bg-white border rounded-lg p-4"
-                            >
-                                <LoadingSkeleton
-                                    variant="header"
-                                    className="h-12 mb-4"
-                                />
-                                <div className="space-y-3">
-                                    <LoadingSkeleton variant="task" />
-                                    <LoadingSkeleton variant="task" />
-                                    <LoadingSkeleton variant="task" />
-                                </div>
-                            </div>
-                        ))}
+                        <LoadingSkeleton variant="task" count={3} />
                     </div>
                 </MainLayout>
             </div>
