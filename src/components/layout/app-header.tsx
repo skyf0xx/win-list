@@ -11,8 +11,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Search, Plus, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { LoadingSkeleton } from '@/components/base/loading-skeleton';
+import { cn } from '@/lib/utils';
 
 interface AppHeaderProps {
     profiles: Profile[];
@@ -39,17 +40,39 @@ export function AppHeader({
 
     const currentProfile = profiles.find((p) => p.id === currentProfileId);
 
-    const handleClearSearch = () => {
+    const handleClearSearch = useCallback(() => {
         onSearchChange('');
-    };
+    }, [onSearchChange]);
 
-    const handleProfileSelect = (value: string) => {
-        if (value === 'create-new') {
-            onCreateProfile?.();
-        } else {
-            onProfileChange(value);
-        }
-    };
+    const handleProfileSelect = useCallback(
+        (value: string) => {
+            if (value === 'create-new') {
+                onCreateProfile?.();
+            } else {
+                onProfileChange(value);
+            }
+        },
+        [onCreateProfile, onProfileChange]
+    );
+
+    // Keyboard shortcuts
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'k') {
+                    e.preventDefault();
+                    const searchInput = document.querySelector(
+                        '[data-search-input]'
+                    ) as HTMLInputElement;
+                    searchInput?.focus();
+                } else if (e.key === 'n') {
+                    e.preventDefault();
+                    onNewTask();
+                }
+            }
+        },
+        [onNewTask]
+    );
 
     if (loading) {
         return (
@@ -72,7 +95,10 @@ export function AppHeader({
     }
 
     return (
-        <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+        <header
+            className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60"
+            onKeyDown={handleKeyDown}
+        >
             <div className="container mx-auto px-4 py-3">
                 <div className="flex items-center gap-4">
                     {/* Profile Selector */}
@@ -130,7 +156,7 @@ export function AppHeader({
                                         <div className="h-px bg-gray-200 my-1" />
                                         <SelectItem
                                             value="create-new"
-                                            className="text-blue-600"
+                                            className="text-blue-600 focus:text-blue-600"
                                         >
                                             <div className="flex items-center gap-2">
                                                 <Plus className="w-3 h-3" />
@@ -148,17 +174,18 @@ export function AppHeader({
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <Input
+                                data-search-input
                                 type="text"
-                                placeholder="Search tasks..."
+                                placeholder="Search tasks... (⌘K)"
                                 value={searchQuery}
                                 onChange={(e) => onSearchChange(e.target.value)}
                                 onFocus={() => setIsSearchFocused(true)}
                                 onBlur={() => setIsSearchFocused(false)}
-                                className={`pl-9 pr-9 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                                    isSearchFocused || searchQuery
-                                        ? 'ring-2 ring-blue-500/20'
-                                        : ''
-                                }`}
+                                className={cn(
+                                    'pl-9 pr-9 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500',
+                                    (isSearchFocused || searchQuery) &&
+                                        'ring-2 ring-blue-500/20'
+                                )}
                             />
                             {searchQuery && (
                                 <button
@@ -178,6 +205,7 @@ export function AppHeader({
                             onClick={onNewTask}
                             disabled={!currentProfileId}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 gap-2"
+                            title="Create new task (⌘N)"
                         >
                             <Plus className="h-4 w-4" />
                             <span className="hidden sm:inline">New Task</span>
@@ -185,7 +213,7 @@ export function AppHeader({
                     </div>
                 </div>
 
-                {/* Mobile Layout - Responsive Enhancement */}
+                {/* Mobile Search Results Indicator */}
                 <div className="md:hidden">
                     {searchQuery && (
                         <div className="mt-3 px-1">
