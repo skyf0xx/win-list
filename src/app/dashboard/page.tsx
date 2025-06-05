@@ -12,6 +12,8 @@ import { useCurrentProfile, useTasksByStatus } from '@/hooks/api';
 import { useCategories } from '@/hooks/api';
 import { TaskModal } from '@/components/features/tasks/task-modal';
 import { TaskStatusSection } from '@/components/features/tasks/task-status-section';
+import { ProfileCreationModal } from '@/components/features/profiles/profile-creation-modal';
+import { redirect } from 'next/navigation';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -21,6 +23,7 @@ export default function Dashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     // Get current profile with fallback to first profile
     const {
@@ -43,12 +46,18 @@ export default function Dashboard() {
     // Get categories for the current profile
     const { data: categories = [] } = useCategories(currentProfile?.id || '');
 
-    // Set default profile when profiles load
+    // Auto-select profile when profiles load
     useEffect(() => {
         if (profiles.length && !currentProfileId) {
             setCurrentProfileId(profiles[0].id);
         }
     }, [profiles, currentProfileId]);
+
+    // Handle profile creation success
+    const handleProfileCreated = (newProfileId: string) => {
+        setCurrentProfileId(newProfileId);
+        setShowProfileModal(false);
+    };
 
     // Handle opening task modal for new task
     const handleNewTask = () => {
@@ -75,6 +84,11 @@ export default function Dashboard() {
         console.log('Task saved successfully:', task);
     };
 
+    // Handle create profile button click
+    const handleCreateProfile = () => {
+        setShowProfileModal(true);
+    };
+
     // Loading state
     if (status === 'loading' || profilesLoading) {
         return (
@@ -91,30 +105,33 @@ export default function Dashboard() {
 
     // Not authenticated
     if (status === 'unauthenticated' || !session) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <EmptyState
-                    type="general"
-                    title="Please sign in"
-                    description="You need to be signed in to access your tasks."
-                />
-            </div>
-        );
+        redirect('/');
     }
 
-    // No profiles yet
-    if (!hasProfiles) {
+    // No profiles - show create first profile
+    if (!profilesLoading && !hasProfiles) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <EmptyState
-                    type="profiles"
-                    action={{
-                        label: 'Create Your First Profile',
-                        onClick: () => {
-                            // TODO: Implement profile creation
-                            console.log('Create first profile');
-                        },
-                    }}
+            <div className="min-h-screen bg-gray-50">
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center space-y-6 max-w-md mx-auto px-4">
+                        <EmptyState
+                            type="profiles"
+                            title="Welcome to Task Manager!"
+                            description="Let's get started by creating your first profile to organize your tasks."
+                            action={{
+                                label: 'Create Your First Profile',
+                                onClick: handleCreateProfile,
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Profile Creation Modal */}
+                <ProfileCreationModal
+                    isOpen={showProfileModal}
+                    onClose={() => setShowProfileModal(false)}
+                    userId={session.user.id}
+                    onSuccess={handleProfileCreated}
                 />
             </div>
         );
@@ -131,6 +148,8 @@ export default function Dashboard() {
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     onNewTask={handleNewTask}
+                    onCreateProfile={handleCreateProfile}
+                    loading={profilesLoading}
                 />
                 <MainLayout>
                     <ErrorMessage
@@ -154,6 +173,7 @@ export default function Dashboard() {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 onNewTask={handleNewTask}
+                onCreateProfile={handleCreateProfile}
             />
 
             <MainLayout loading={tasksLoading}>
@@ -213,17 +233,6 @@ export default function Dashboard() {
                         />
                     </div>
                 )}
-
-                {/* No Tasks at All (not searching) */}
-                {!searchQuery && counts.total === 0 && !tasksLoading && (
-                    <EmptyState
-                        type="tasks"
-                        action={{
-                            label: 'Create Your First Task',
-                            onClick: handleNewTask,
-                        }}
-                    />
-                )}
             </MainLayout>
 
             {/* Task Modal */}
@@ -234,6 +243,14 @@ export default function Dashboard() {
                 profileId={currentProfile?.id || null}
                 onClose={handleCloseModal}
                 onSuccess={handleTaskSuccess}
+            />
+
+            {/* Profile Creation Modal */}
+            <ProfileCreationModal
+                isOpen={showProfileModal}
+                onClose={() => setShowProfileModal(false)}
+                userId={session.user.id}
+                onSuccess={handleProfileCreated}
             />
         </div>
     );
