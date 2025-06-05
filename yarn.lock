@@ -1112,6 +1112,25 @@
     postcss "^8.4.41"
     tailwindcss "4.1.8"
 
+"@tanstack/eslint-plugin-query@^5.78.0":
+  version "5.78.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/eslint-plugin-query/-/eslint-plugin-query-5.78.0.tgz#483559527f71a4408e7a2b3faa335c841ba76a81"
+  integrity sha512-hYkhWr3UP0CkAsn/phBVR98UQawbw8CmTSgWtdgEBUjI60/GBaEIkpgi/Bp/2I8eIDK4+vdY7ac6jZx+GR+hEQ==
+  dependencies:
+    "@typescript-eslint/utils" "^8.18.1"
+
+"@tanstack/query-core@5.80.5":
+  version "5.80.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.80.5.tgz#b4fc78101cbd0d2eddb1424e2fa0712e8b13cf2b"
+  integrity sha512-kFWXdQOUcjL/Ugk3GrI9eMuG3DsKBGaLIgyOLekR2UOrRrJgkLgPUNzZ10i8FCkfi4SgLABhOtQhx1HjoB9EZQ==
+
+"@tanstack/react-query@^5.80.5":
+  version "5.80.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.80.5.tgz#73f2136e60c6daaaadb8fd3f429f76d7a0660883"
+  integrity sha512-C0d+pvIahk6fJK5bXxyf36r9Ft6R9O0mwl781CjBrYGRJc76XRJcKhkVpxIo68cjMy3i47gd4O1EGooAke/OCQ==
+  dependencies:
+    "@tanstack/query-core" "5.80.5"
+
 "@testing-library/jest-dom@^6.6.3":
   version "6.6.3"
   resolved "https://registry.yarnpkg.com/@testing-library/jest-dom/-/jest-dom-6.6.3.tgz#26ba906cf928c0f8172e182c6fe214eb4f9f2bd2"
@@ -1356,7 +1375,7 @@
     semver "^7.6.0"
     ts-api-utils "^2.1.0"
 
-"@typescript-eslint/utils@8.33.1":
+"@typescript-eslint/utils@8.33.1", "@typescript-eslint/utils@^8.18.1":
   version "8.33.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-8.33.1.tgz#ea22f40d3553da090f928cf17907e963643d4b96"
   integrity sha512-52HaBiEQUaRYqAXpfzWSR2U3gxk92Kw006+xZpElaPMg3C4PgM+A5LqwoQI1f9E5aZ/qlxAZxzm42WX+vn92SQ==
