@@ -30,18 +30,22 @@ export function PrioritySelector({
         LOW: { label: 'Low', color: 'bg-gray-400', textColor: 'text-gray-600' },
     };
 
+    // Ensure we have a valid priority value, fallback to MEDIUM if invalid
+    const safeValue = value && priorityConfig[value] ? value : 'MEDIUM';
+    const currentConfig = priorityConfig[safeValue];
+
     return (
-        <Select value={value} onValueChange={onChange} disabled={disabled}>
+        <Select value={safeValue} onValueChange={onChange} disabled={disabled}>
             <SelectTrigger>
                 <SelectValue>
                     <div className="flex items-center gap-2">
                         <div
                             className={cn(
                                 'w-3 h-3 rounded-full',
-                                priorityConfig[value].color
+                                currentConfig.color
                             )}
                         />
-                        <span>{priorityConfig[value].label}</span>
+                        <span>{currentConfig.label}</span>
                     </div>
                 </SelectValue>
             </SelectTrigger>
