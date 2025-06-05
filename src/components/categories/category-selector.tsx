@@ -51,6 +51,8 @@ export function CategorySelector({
 
     const createCategoryMutation = useCreateCategory();
 
+    // Convert empty string to "none" for the Select component
+    const selectValue = value || 'none';
     const selectedCategory = categories.find((cat) => cat.id === value);
 
     const handleCreateCategory = async () => {
@@ -86,6 +88,8 @@ export function CategorySelector({
     const handleValueChange = (newValue: string) => {
         if (newValue === 'create-new') {
             setShowCreateForm(true);
+        } else if (newValue === 'none') {
+            onChange(''); // Convert back to empty string for the form
         } else {
             onChange(newValue);
         }
@@ -218,7 +222,7 @@ export function CategorySelector({
 
     return (
         <Select
-            value={value}
+            value={selectValue}
             onValueChange={handleValueChange}
             disabled={disabled}
         >
@@ -245,7 +249,7 @@ export function CategorySelector({
             </SelectTrigger>
             <SelectContent>
                 {/* No Category Option */}
-                <SelectItem value="">
+                <SelectItem value="none">
                     <span className="text-gray-500">No category</span>
                 </SelectItem>
 
