@@ -76,6 +76,7 @@ export function TaskCard({
                             'transition-opacity duration-200 cursor-grab active:cursor-grabbing',
                             'text-gray-400 hover:text-gray-600'
                         )}
+                        onMouseDown={(e) => e.stopPropagation()} // Prevent click when grabbing
                     >
                         <GripVertical className="h-4 w-4" />
                     </div>
