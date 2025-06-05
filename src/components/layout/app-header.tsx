@@ -189,7 +189,14 @@ export function AppHeader({
                                 <div className="flex items-center gap-2">
                                     {/* User Avatar */}
                                     <div className="relative">
-                                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                                            style={{
+                                                backgroundColor:
+                                                    currentProfile?.color ||
+                                                    '#3B82F6', // Default to blue if no profile color
+                                            }}
+                                        >
                                             {getUserInitials()}
                                         </div>
 
