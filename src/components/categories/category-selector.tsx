@@ -52,11 +52,10 @@ export function CategorySelector({
     const createCategoryMutation = useCreateCategory();
 
     // Convert empty string to "none" for the Select component
-    // But also handle the case where value might be undefined/null
-    const selectValue = value || 'none';
+    const selectValue = value && value.trim() !== '' ? value : 'none';
     const selectedCategory = categories.find((cat) => cat.id === value);
 
-    // Reset form when modal closes or value changes
+    // Reset form when modal closes
     useEffect(() => {
         if (!showCreateForm) {
             setNewCategoryName('');
@@ -231,77 +230,89 @@ export function CategorySelector({
     }
 
     return (
-        <Select
-            value={selectValue}
-            onValueChange={handleValueChange}
-            disabled={disabled}
-        >
-            <SelectTrigger>
-                <SelectValue placeholder="Select category">
-                    {selectedCategory ? (
-                        <div className="flex items-center gap-2">
-                            {selectedCategory.color && (
-                                <div
-                                    className="w-3 h-3 rounded-full flex-shrink-0"
-                                    style={{
-                                        backgroundColor: selectedCategory.color,
-                                    }}
-                                />
-                            )}
-                            <span className="truncate">
-                                {selectedCategory.name}
+        <div className="space-y-1">
+            <Select
+                key={`category-select-${selectValue}`} // Force re-render when value changes
+                value={selectValue}
+                onValueChange={handleValueChange}
+                disabled={disabled}
+            >
+                <SelectTrigger>
+                    <SelectValue placeholder="Select category">
+                        {selectedCategory ? (
+                            <div className="flex items-center gap-2">
+                                {selectedCategory.color && (
+                                    <div
+                                        className="w-3 h-3 rounded-full flex-shrink-0"
+                                        style={{
+                                            backgroundColor:
+                                                selectedCategory.color,
+                                        }}
+                                    />
+                                )}
+                                <span className="truncate">
+                                    {selectedCategory.name}
+                                </span>
+                            </div>
+                        ) : value && value.trim() !== '' ? (
+                            <span className="text-amber-600 text-sm">
+                                Category not found (ID: {value})
                             </span>
-                        </div>
-                    ) : (
+                        ) : (
+                            <span className="text-gray-500">No category</span>
+                        )}
+                    </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                    {/* No Category Option */}
+                    <SelectItem value="none">
                         <span className="text-gray-500">No category</span>
-                    )}
-                </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-                {/* No Category Option */}
-                <SelectItem value="none">
-                    <span className="text-gray-500">No category</span>
-                </SelectItem>
+                    </SelectItem>
 
-                {/* Existing Categories */}
-                {categories.length > 0 && (
-                    <>
-                        {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
+                    {/* Existing Categories */}
+                    {categories.length > 0 && (
+                        <>
+                            {categories.map((category) => (
+                                <SelectItem
+                                    key={category.id}
+                                    value={category.id}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        {category.color && (
+                                            <div
+                                                className="w-3 h-3 rounded-full flex-shrink-0"
+                                                style={{
+                                                    backgroundColor:
+                                                        category.color,
+                                                }}
+                                            />
+                                        )}
+                                        <span className="truncate">
+                                            {category.name}
+                                        </span>
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </>
+                    )}
+
+                    {/* Create New Category Option */}
+                    {profileId && (
+                        <>
+                            <div className="h-px bg-gray-200 my-1" />
+                            <SelectItem
+                                value="create-new"
+                                className="text-blue-600 focus:text-blue-600"
+                            >
                                 <div className="flex items-center gap-2">
-                                    {category.color && (
-                                        <div
-                                            className="w-3 h-3 rounded-full flex-shrink-0"
-                                            style={{
-                                                backgroundColor: category.color,
-                                            }}
-                                        />
-                                    )}
-                                    <span className="truncate">
-                                        {category.name}
-                                    </span>
+                                    <Plus className="w-3 h-3" />
+                                    <span>Create New Category</span>
                                 </div>
                             </SelectItem>
-                        ))}
-                    </>
-                )}
-
-                {/* Create New Category Option */}
-                {profileId && (
-                    <>
-                        <div className="h-px bg-gray-200 my-1" />
-                        <SelectItem
-                            value="create-new"
-                            className="text-blue-600 focus:text-blue-600"
-                        >
-                            <div className="flex items-center gap-2">
-                                <Plus className="w-3 h-3" />
-                                <span>Create New Category</span>
-                            </div>
-                        </SelectItem>
-                    </>
-                )}
-            </SelectContent>
-        </Select>
+                        </>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
     );
 }
