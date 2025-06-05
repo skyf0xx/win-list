@@ -10,10 +10,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, X } from 'lucide-react';
+import { Search, Plus, X, LogOut, User } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { LoadingSkeleton } from '@/components/base/loading-skeleton';
 import { cn } from '@/lib/utils';
+import { signOut, useSession } from 'next-auth/react';
 
 interface AppHeaderProps {
     profiles: Profile[];
@@ -37,6 +38,8 @@ export function AppHeader({
     loading = false,
 }: AppHeaderProps) {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isSigningOut, setIsSigningOut] = useState(false);
+    const { data: session } = useSession();
 
     const currentProfile = profiles.find((p) => p.id === currentProfileId);
 
@@ -45,9 +48,17 @@ export function AppHeader({
     }, [onSearchChange]);
 
     const handleProfileSelect = useCallback(
-        (value: string) => {
+        async (value: string) => {
             if (value === 'create-new' && onCreateProfile) {
                 onCreateProfile();
+            } else if (value === 'sign-out') {
+                setIsSigningOut(true);
+                try {
+                    await signOut({ callbackUrl: '/' });
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    setIsSigningOut(false);
+                }
             } else {
                 onProfileChange(value);
             }
@@ -106,6 +117,7 @@ export function AppHeader({
                         <Select
                             value={currentProfileId || ''}
                             onValueChange={handleProfileSelect}
+                            disabled={isSigningOut}
                         >
                             <SelectTrigger className="w-[180px] bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                 <SelectValue placeholder="Select profile">
@@ -130,6 +142,22 @@ export function AppHeader({
                                 </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
+                                {/* User Info Header */}
+                                {session?.user && (
+                                    <>
+                                        <div className="px-2 py-1.5 text-xs text-gray-500 border-b border-gray-100">
+                                            <div className="flex items-center gap-2">
+                                                <User className="w-3 h-3" />
+                                                <span className="truncate">
+                                                    {session.user.name ||
+                                                        session.user.email}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Profiles */}
                                 {profiles.map((profile) => (
                                     <SelectItem
                                         key={profile.id}
@@ -151,6 +179,7 @@ export function AppHeader({
                                         </div>
                                     </SelectItem>
                                 ))}
+
                                 {/* Create New Profile Option */}
                                 {onCreateProfile && (
                                     <>
@@ -166,6 +195,23 @@ export function AppHeader({
                                         </SelectItem>
                                     </>
                                 )}
+
+                                {/* Sign Out Option */}
+                                <div className="h-px bg-gray-200 my-1" />
+                                <SelectItem
+                                    value="sign-out"
+                                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                    disabled={isSigningOut}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <LogOut className="w-3 h-3" />
+                                        <span>
+                                            {isSigningOut
+                                                ? 'Signing out...'
+                                                : 'Sign Out'}
+                                        </span>
+                                    </div>
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -187,12 +233,14 @@ export function AppHeader({
                                     (isSearchFocused || searchQuery) &&
                                         'ring-2 ring-blue-500/20'
                                 )}
+                                disabled={isSigningOut}
                             />
                             {searchQuery && (
                                 <button
                                     onClick={handleClearSearch}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                     aria-label="Clear search"
+                                    disabled={isSigningOut}
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -204,7 +252,7 @@ export function AppHeader({
                     <div className="flex-shrink-0">
                         <Button
                             onClick={onNewTask}
-                            disabled={!currentProfileId}
+                            disabled={!currentProfileId || isSigningOut}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 gap-2"
                             title="Create new task (⌘N)"
                         >
@@ -226,6 +274,7 @@ export function AppHeader({
                                 <button
                                     onClick={handleClearSearch}
                                     className="ml-2 text-blue-600 hover:text-blue-700 font-medium"
+                                    disabled={isSigningOut}
                                 >
                                     Clear
                                 </button>
