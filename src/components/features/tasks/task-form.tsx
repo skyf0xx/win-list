@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Task, Category } from '@/generated/prisma';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,8 @@ interface TaskFormProps {
     loading?: boolean;
 }
 
+type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+
 export function TaskForm({
     initialData,
     categories,
@@ -39,11 +41,39 @@ export function TaskForm({
         description: '',
         categoryId: '',
         priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
-        status: 'PENDING' as 'PENDING' | 'IN_PROGRESS' | 'COMPLETED',
+        status: 'PENDING' as TaskStatus,
         dueDate: '',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Memoize the handleChange function
+    const handleChange = useCallback((field: string, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+
+        // Clear error when user makes changes
+        setErrors((prev) => {
+            if (prev.hasOwnProperty(field)) {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            }
+            return prev;
+        });
+    }, []);
+
+    // Separate handler for status changes with validation
+    const handleStatusChange = useCallback(
+        (value: string) => {
+            // Validate that the value is a valid status
+            if (['PENDING', 'IN_PROGRESS', 'COMPLETED'].includes(value)) {
+                handleChange('status', value);
+            } else {
+                console.warn('Invalid status value:', value);
+            }
+        },
+        [handleChange]
+    );
 
     // Populate form with initial data when editing
     useEffect(() => {
@@ -71,7 +101,7 @@ export function TaskForm({
         }
         // Clear errors when initialData changes
         setErrors({});
-    }, [initialData, categories]);
+    }, [initialData]);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -109,15 +139,6 @@ export function TaskForm({
         };
 
         onSubmit(submitData);
-    };
-
-    const handleChange = (field: string, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-
-        // Clear error when user makes changes
-        if (errors[field]) {
-            setErrors((prev) => ({ ...prev, [field]: '' }));
-        }
     };
 
     return (
@@ -202,12 +223,21 @@ export function TaskForm({
                 <div>
                     <Label className="text-sm font-medium">Status</Label>
                     <Select
+                        // Force re-render when initialData changes
+                        key={`status-select-${initialData?.id || 'new'}-${
+                            formData.status
+                        }`}
                         value={formData.status}
-                        onValueChange={(value) => handleChange('status', value)}
+                        onValueChange={handleStatusChange}
                         disabled={loading}
                     >
                         <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue>
+                                {formData.status === 'PENDING' && 'Pending'}
+                                {formData.status === 'IN_PROGRESS' &&
+                                    'In Progress'}
+                                {formData.status === 'COMPLETED' && 'Completed'}
+                            </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="PENDING">Pending</SelectItem>
