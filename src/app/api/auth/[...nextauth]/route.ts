@@ -1,7 +1,7 @@
-// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaClient } from '@/generated/prisma';
+import { createSampleData } from '@/lib/onboard-data';
 
 const prisma = new PrismaClient();
 
@@ -21,12 +21,21 @@ const handler = NextAuth({
                     });
 
                     if (!existingUser) {
-                        await prisma.user.create({
+                        const newUser = await prisma.user.create({
                             data: {
                                 email: user.email!,
                                 name: user.name || '',
                             },
                         });
+
+                        try {
+                            await createSampleData(newUser.id);
+                        } catch (sampleDataError) {
+                            console.error(
+                                'Failed to create sample data:',
+                                sampleDataError
+                            );
+                        }
                     }
                     return true;
                 } catch (error) {
@@ -38,7 +47,6 @@ const handler = NextAuth({
         },
         async session({ session }) {
             if (session.user?.email) {
-                // Get user from your database
                 const dbUser = await prisma.user.findUnique({
                     where: { email: session.user.email },
                 });
