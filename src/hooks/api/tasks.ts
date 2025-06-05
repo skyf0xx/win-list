@@ -26,9 +26,16 @@ export const useCreateTask = () => {
     return useMutation({
         mutationFn: taskApi.create,
         onSuccess: (newTask) => {
-            // Invalidate tasks for this profile (easier than optimistic update for filtered lists)
+            // Invalidate all task queries for this profile
             queryClient.invalidateQueries({
-                queryKey: queryKeys.tasks.byProfileId(newTask.profileId),
+                queryKey: ['tasks', 'profile', newTask.profileId],
+                refetchType: 'all', // Forces refetch of both active AND inactive queries
+            });
+
+            // Also invalidate the specific profile to update task counts
+            queryClient.invalidateQueries({
+                queryKey: ['profiles', newTask.profileId],
+                refetchType: 'all',
             });
         },
     });
@@ -42,20 +49,24 @@ export const useUpdateTask = () => {
             taskApi.update(id, data),
         onMutate: async ({ id, data }) => {
             // Cancel outgoing refetches
-            await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
+            await queryClient.cancelQueries({ queryKey: ['tasks'] });
 
             // Snapshot previous values
             const previousTasks = queryClient.getQueriesData({
-                queryKey: queryKeys.tasks.all,
+                queryKey: ['tasks'],
             });
 
             // Optimistically update all task caches
             queryClient.setQueriesData<Task[]>(
-                { queryKey: queryKeys.tasks.all },
-                (old) =>
-                    old?.map((task) =>
+                { queryKey: ['tasks'] },
+                (old) => {
+                    // Type guard: ensure old is an array
+                    if (!Array.isArray(old)) return old;
+
+                    return old.map((task) =>
                         task.id === id ? ({ ...task, ...data } as Task) : task
-                    )
+                    );
+                }
             );
 
             return { previousTasks };
@@ -75,9 +86,16 @@ export const useUpdateTask = () => {
                 updatedTask
             );
 
-            // Invalidate all task lists for this profile to ensure consistency
+            // Invalidate all task lists for this profile with refetchType: 'all'
             queryClient.invalidateQueries({
-                queryKey: queryKeys.tasks.byProfileId(updatedTask.profileId),
+                queryKey: ['tasks', 'profile', updatedTask.profileId],
+                refetchType: 'all',
+            });
+
+            // Also invalidate profile if task status changed (for counts)
+            queryClient.invalidateQueries({
+                queryKey: ['profiles', updatedTask.profileId],
+                refetchType: 'all',
             });
         },
     });
@@ -90,17 +108,22 @@ export const useDeleteTask = () => {
         mutationFn: taskApi.delete,
         onMutate: async (taskId) => {
             // Cancel outgoing refetches
-            await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
+            await queryClient.cancelQueries({ queryKey: ['tasks'] });
 
             // Snapshot previous values
             const previousTasks = queryClient.getQueriesData({
-                queryKey: queryKeys.tasks.all,
+                queryKey: ['tasks'],
             });
 
             // Optimistically remove from all task caches
             queryClient.setQueriesData<Task[]>(
-                { queryKey: queryKeys.tasks.all },
-                (old) => old?.filter((task) => task.id !== taskId)
+                { queryKey: ['tasks'] },
+                (old) => {
+                    // Type guard: ensure old is an array
+                    if (!Array.isArray(old)) return old;
+
+                    return old.filter((task) => task.id !== taskId);
+                }
             );
 
             return { previousTasks };
@@ -121,7 +144,14 @@ export const useDeleteTask = () => {
 
             // Invalidate task lists to ensure consistency
             queryClient.invalidateQueries({
-                queryKey: queryKeys.tasks.byProfileId(deletedTask.profileId),
+                queryKey: ['tasks', 'profile', deletedTask.profileId],
+                refetchType: 'all',
+            });
+
+            // Also invalidate profile for updated task counts
+            queryClient.invalidateQueries({
+                queryKey: ['profiles', deletedTask.profileId],
+                refetchType: 'all',
             });
         },
     });
@@ -152,11 +182,11 @@ export const useBulkUpdateTaskOrder = () => {
         mutationFn: taskApi.bulkUpdateOrder,
         onMutate: async ({ taskUpdates }) => {
             // Cancel outgoing refetches
-            await queryClient.cancelQueries({ queryKey: queryKeys.tasks.all });
+            await queryClient.cancelQueries({ queryKey: ['tasks'] });
 
             // Snapshot previous values
             const previousTasks = queryClient.getQueriesData({
-                queryKey: queryKeys.tasks.all,
+                queryKey: ['tasks'],
             });
 
             // Create a map of updates for quick lookup
@@ -166,14 +196,18 @@ export const useBulkUpdateTaskOrder = () => {
 
             // Optimistically update sort orders in all task caches
             queryClient.setQueriesData<Task[]>(
-                { queryKey: queryKeys.tasks.all },
-                (old) =>
-                    old?.map((task) => {
+                { queryKey: ['tasks'] },
+                (old) => {
+                    // Type guard: ensure old is an array
+                    if (!Array.isArray(old)) return old;
+
+                    return old.map((task) => {
                         const newSortOrder = updateMap.get(task.id);
                         return newSortOrder !== undefined
                             ? { ...task, sortOrder: newSortOrder }
                             : task;
-                    })
+                    });
+                }
             );
 
             return { previousTasks };
@@ -188,7 +222,10 @@ export const useBulkUpdateTaskOrder = () => {
         },
         onSettled: () => {
             // Always refetch after bulk update to ensure consistency
-            queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+            queryClient.invalidateQueries({
+                queryKey: ['tasks'],
+                refetchType: 'all',
+            });
         },
     });
 };
