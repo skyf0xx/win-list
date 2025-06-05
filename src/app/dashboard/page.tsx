@@ -102,24 +102,6 @@ export default function Dashboard() {
         );
     }
 
-    // No profiles yet
-    if (!hasProfiles) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <EmptyState
-                    type="profiles"
-                    action={{
-                        label: 'Create Your First Profile',
-                        onClick: () => {
-                            // TODO: Implement profile creation
-                            console.log('Create first profile');
-                        },
-                    }}
-                />
-            </div>
-        );
-    }
-
     // Tasks loading error
     if (tasksError) {
         return (
@@ -212,17 +194,6 @@ export default function Dashboard() {
                             onTaskClick={handleEditTask}
                         />
                     </div>
-                )}
-
-                {/* No Tasks at All (not searching) */}
-                {!searchQuery && counts.total === 0 && !tasksLoading && (
-                    <EmptyState
-                        type="tasks"
-                        action={{
-                            label: 'Create Your First Task',
-                            onClick: handleNewTask,
-                        }}
-                    />
                 )}
             </MainLayout>
 
