@@ -46,8 +46,8 @@ export function AppHeader({
 
     const handleProfileSelect = useCallback(
         (value: string) => {
-            if (value === 'create-new') {
-                onCreateProfile?.();
+            if (value === 'create-new' && onCreateProfile) {
+                onCreateProfile();
             } else {
                 onProfileChange(value);
             }
@@ -151,12 +151,13 @@ export function AppHeader({
                                         </div>
                                     </SelectItem>
                                 ))}
+                                {/* Create New Profile Option */}
                                 {onCreateProfile && (
                                     <>
                                         <div className="h-px bg-gray-200 my-1" />
                                         <SelectItem
                                             value="create-new"
-                                            className="text-blue-600 focus:text-blue-600"
+                                            className="text-blue-600 focus:text-blue-600 focus:bg-blue-50"
                                         >
                                             <div className="flex items-center gap-2">
                                                 <Plus className="w-3 h-3" />
