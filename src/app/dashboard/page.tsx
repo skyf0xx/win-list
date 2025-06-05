@@ -104,7 +104,7 @@ export default function Dashboard() {
                         <div className="text-center py-12">
                             <div className="max-w-md mx-auto">
                                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                                    Welcome to Task Manager
+                                    Welcome to Win List
                                 </h2>
                                 <p className="text-gray-600 mb-6">
                                     Get started by creating your first profile
