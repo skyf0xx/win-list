@@ -2,11 +2,10 @@
 
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/layout/app-header';
 import { ProfileCreateForm } from '@/components/features/profiles/profile-create-form';
-// TODO: Import these when you create the hooks
-// import { useProfiles, useCreateProfile } from '@/hooks/profiles';
+import { useCreateProfile, useProfiles } from '@/hooks/api';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -16,22 +15,23 @@ export default function Dashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showProfileForm, setShowProfileForm] = useState(false);
 
-    // TODO: Uncomment when hooks are created
-    // const { data: profiles = [], isLoading: profilesLoading } = useProfiles(session?.user?.id);
-    // const createProfileMutation = useCreateProfile();
+    // Use the actual hooks - only call when user ID exists
+    const { data: profiles = [], isLoading: profilesLoading } = useProfiles(
+        session?.user?.id || ''
+    );
+    const createProfileMutation = useCreateProfile();
 
-    // Temporary mock data for now
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const profiles: any[] = [];
-    const profilesLoading = false;
-    const createProfileMutation = {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mutateAsync: async (data: any) => {
-            console.log('Creating profile:', data);
-            // TODO: Replace with actual mutation
-        },
-        isPending: false,
-    };
+    // Set default profile when profiles load
+    useEffect(() => {
+        if (
+            session &&
+            status === 'authenticated' && // Fixed: should be 'authenticated', not !== 'authenticated'
+            profiles.length &&
+            !currentProfileId
+        ) {
+            setCurrentProfileId(profiles[0].id);
+        }
+    }, [profiles, currentProfileId, session, status]);
 
     if (status === 'loading') {
         return (
@@ -48,28 +48,39 @@ export default function Dashboard() {
         redirect('/');
     }
 
-    // TODO: Set default profile when profiles load
-    // useEffect(() => {
-    //     if (profiles.length && !currentProfileId) {
-    //         setCurrentProfileId(profiles[0].id);
-    //     }
-    // }, [profiles, currentProfileId]);
-
     const handleCreateProfile = async (data: {
         name: string;
         color?: string;
     }) => {
+        if (!session?.user?.id) return; // Guard clause
+
         try {
-            await createProfileMutation.mutateAsync({
+            const newProfile = await createProfileMutation.mutateAsync({
                 userId: session.user.id,
                 ...data,
             });
+
+            // Set the new profile as current
+            setCurrentProfileId(newProfile.id);
             setShowProfileForm(false);
-            // TODO: Set the new profile as current when hooks are connected
+
+            // TODO: Add success toast notification
+            console.log('Profile created successfully:', newProfile.name);
         } catch (error) {
             console.error('Failed to create profile:', error);
-            // TODO: Add toast notification for error
+            // TODO: Add error toast notification
         }
+    };
+
+    const handleNewTask = () => {
+        if (!currentProfileId) {
+            // Show message that they need a profile first
+            console.log('Please create a profile first');
+            setShowProfileForm(true);
+            return;
+        }
+        // TODO: Open task creation modal
+        console.log('Open new task modal for profile:', currentProfileId);
     };
 
     return (
@@ -80,21 +91,48 @@ export default function Dashboard() {
                 onProfileChange={setCurrentProfileId}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
-                onNewTask={() => {
-                    // TODO: Open task creation modal
-                    console.log('Open new task modal');
-                }}
+                onNewTask={handleNewTask}
                 onCreateProfile={() => setShowProfileForm(true)}
                 loading={profilesLoading}
             />
 
             <main className="container mx-auto px-4 py-6">
-                {/* TODO: Add main content - task sections */}
-                <div className="text-center py-12">
-                    <p className="text-gray-500">
-                        Main content will go here - task sections, etc.
-                    </p>
-                </div>
+                {/* Show create profile prompt if no profiles exist */}
+                {!profilesLoading &&
+                    profiles.length === 0 &&
+                    !showProfileForm && (
+                        <div className="text-center py-12">
+                            <div className="max-w-md mx-auto">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                                    Welcome to Task Manager
+                                </h2>
+                                <p className="text-gray-600 mb-6">
+                                    Get started by creating your first profile
+                                    to organize your tasks.
+                                </p>
+                                <button
+                                    onClick={() => setShowProfileForm(true)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                                >
+                                    Create Your First Profile
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                {/* Main content when profiles exist */}
+                {profiles.length > 0 && (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500">
+                            Main content will go here - task sections, etc.
+                        </p>
+                        <p className="text-sm text-gray-400 mt-2">
+                            Current profile:{' '}
+                            {profiles.find((p) => p.id === currentProfileId)
+                                ?.name || 'None'}
+                        </p>
+                    </div>
+                )}
             </main>
 
             {/* Profile Creation Modal */}
