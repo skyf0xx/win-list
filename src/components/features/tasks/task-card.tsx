@@ -91,6 +91,7 @@ export function TaskCard({
                             'truncate',
                             isCompleted && 'line-through text-gray-500'
                         )}
+                        title={task.title} // Tooltip for truncated text
                     >
                         {task.title}
                     </h3>
@@ -102,6 +103,7 @@ export function TaskCard({
                                 'text-xs text-gray-600 mt-1 line-clamp-2',
                                 isCompleted && 'text-gray-400'
                             )}
+                            title={task.description} // Tooltip for truncated text
                         >
                             {task.description}
                         </p>
