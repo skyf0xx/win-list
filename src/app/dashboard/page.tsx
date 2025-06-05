@@ -15,7 +15,6 @@ export default function Dashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showProfileForm, setShowProfileForm] = useState(false);
 
-    // Use the actual hooks - only call when user ID exists
     const { data: profiles = [], isLoading: profilesLoading } = useProfiles(
         session?.user?.id || ''
     );
@@ -25,7 +24,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (
             session &&
-            status === 'authenticated' && // Fixed: should be 'authenticated', not !== 'authenticated'
+            status === 'authenticated' &&
             profiles.length &&
             !currentProfileId
         ) {
@@ -52,7 +51,7 @@ export default function Dashboard() {
         name: string;
         color?: string;
     }) => {
-        if (!session?.user?.id) return; // Guard clause
+        if (!session?.user?.id) return;
 
         try {
             const newProfile = await createProfileMutation.mutateAsync({
@@ -60,7 +59,6 @@ export default function Dashboard() {
                 ...data,
             });
 
-            // Set the new profile as current
             setCurrentProfileId(newProfile.id);
             setShowProfileForm(false);
 
