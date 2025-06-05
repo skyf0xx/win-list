@@ -1,4 +1,3 @@
-// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaClient } from '@/generated/prisma';
@@ -38,7 +37,6 @@ const handler = NextAuth({
         },
         async session({ session }) {
             if (session.user?.email) {
-                // Get user from your database
                 const dbUser = await prisma.user.findUnique({
                     where: { email: session.user.email },
                 });
