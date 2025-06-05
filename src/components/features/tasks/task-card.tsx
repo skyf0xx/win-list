@@ -21,7 +21,9 @@ export function TaskCard({
     className,
 }: TaskCardProps) {
     const isOverdue =
-        task.dueDate && isPast(task.dueDate) && task.status !== 'COMPLETED';
+        task.dueDate &&
+        isPast(parseISO(task.dueDate.toString())) &&
+        task.status !== 'COMPLETED';
     const isCompleted = task.status === 'COMPLETED';
 
     const formatDueDate = (dateString: string) => {
