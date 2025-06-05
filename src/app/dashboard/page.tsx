@@ -1,21 +1,17 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { Task } from '@/generated/prisma';
 import { AppHeader } from '@/components/layout/app-header';
 import { MainLayout } from '@/components/layout/main-layout';
-import { TaskStatusSection } from '@/components/features/tasks/task-status-section';
-import { ProfileCreateForm } from '@/components/features/profiles/profile-create-form';
 import { LoadingSkeleton } from '@/components/base/loading-skeleton';
 import { EmptyState } from '@/components/base/empty-state';
-import {
-    useCreateProfile,
-    useCurrentProfile,
-    useTasksByStatus,
-    useCategories,
-} from '@/hooks/api';
-import { Task } from '@/generated/prisma';
+import { ErrorMessage } from '@/components/base/error-message';
+import { useCurrentProfile, useTasksByStatus } from '@/hooks/api';
+import { useCategories } from '@/hooks/api';
+import { TaskModal } from '@/components/features/tasks/task-modal';
+import { TaskStatusSection } from '@/components/features/tasks/task-status-section';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -23,11 +19,10 @@ export default function Dashboard() {
         null
     );
     const [searchQuery, setSearchQuery] = useState('');
-    const [showProfileForm, setShowProfileForm] = useState(false);
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-    const createProfileMutation = useCreateProfile();
-
-    // Get current profile with automatic fallback
+    // Get current profile with fallback to first profile
     const {
         currentProfile,
         profiles,
@@ -35,63 +30,49 @@ export default function Dashboard() {
         hasProfiles,
     } = useCurrentProfile(session?.user?.id || '', currentProfileId);
 
-    // Get tasks grouped by status with search filtering
+    // Get tasks grouped by status with search filter
     const {
         tasks,
         counts,
         isLoading: tasksLoading,
         error: tasksError,
-    } = useTasksByStatus(
-        currentProfile?.id || '',
-        searchQuery ? { search: searchQuery } : undefined
-    );
+    } = useTasksByStatus(currentProfile?.id || '', {
+        search: searchQuery || undefined,
+    });
 
     // Get categories for the current profile
     const { data: categories = [] } = useCategories(currentProfile?.id || '');
 
     // Set default profile when profiles load
     useEffect(() => {
-        if (hasProfiles && !currentProfileId && profiles.length > 0) {
+        if (profiles.length && !currentProfileId) {
             setCurrentProfileId(profiles[0].id);
         }
-    }, [hasProfiles, currentProfileId, profiles]);
+    }, [profiles, currentProfileId]);
 
-    const handleCreateProfile = async (data: {
-        name: string;
-        color?: string;
-    }) => {
-        if (!session?.user?.id) return;
-
-        try {
-            const newProfile = await createProfileMutation.mutateAsync({
-                userId: session.user.id,
-                ...data,
-            });
-
-            setCurrentProfileId(newProfile.id);
-            setShowProfileForm(false);
-
-            // TODO: Add success toast notification
-            console.log('Profile created successfully:', newProfile.name);
-        } catch (error) {
-            console.error('Failed to create profile:', error);
-            // TODO: Add error toast notification
-        }
-    };
-
+    // Handle opening task modal for new task
     const handleNewTask = () => {
-        if (!currentProfile) {
-            console.log('Please create a profile first');
-            setShowProfileForm(true);
-            return;
-        }
-        // TODO: Open task creation modal
-        console.log('Open new task modal for profile:', currentProfile.id);
+        setEditingTask(null);
+        setIsTaskModalOpen(true);
     };
 
-    const handleTaskClick = (task: Task) => {
-        // TODO: Open task edit modal
-        console.log('Edit task:', task.id, task.title);
+    // Handle opening task modal for editing
+    const handleEditTask = (task: Task) => {
+        setEditingTask(task);
+        setIsTaskModalOpen(true);
+    };
+
+    // Handle closing task modal
+    const handleCloseModal = () => {
+        setIsTaskModalOpen(false);
+        setEditingTask(null);
+    };
+
+    // Handle successful task creation/update
+    const handleTaskSuccess = (task: Task) => {
+        // TanStack Query will automatically update the cache
+        // so we don't need to manually update state here
+        console.log('Task saved successfully:', task);
     };
 
     // Loading state
@@ -108,9 +89,60 @@ export default function Dashboard() {
         );
     }
 
-    // Redirect if not authenticated
-    if (!session) {
-        redirect('/');
+    // Not authenticated
+    if (status === 'unauthenticated' || !session) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <EmptyState
+                    type="general"
+                    title="Please sign in"
+                    description="You need to be signed in to access your tasks."
+                />
+            </div>
+        );
+    }
+
+    // No profiles yet
+    if (!hasProfiles) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <EmptyState
+                    type="profiles"
+                    action={{
+                        label: 'Create Your First Profile',
+                        onClick: () => {
+                            // TODO: Implement profile creation
+                            console.log('Create first profile');
+                        },
+                    }}
+                />
+            </div>
+        );
+    }
+
+    // Tasks loading error
+    if (tasksError) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <AppHeader
+                    profiles={profiles}
+                    currentProfileId={currentProfileId}
+                    onProfileChange={setCurrentProfileId}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onNewTask={handleNewTask}
+                />
+                <MainLayout>
+                    <ErrorMessage
+                        message="Failed to load tasks"
+                        retry={{
+                            onClick: () => window.location.reload(),
+                            loading: false,
+                        }}
+                    />
+                </MainLayout>
+            </div>
+        );
     }
 
     return (
@@ -122,128 +154,87 @@ export default function Dashboard() {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 onNewTask={handleNewTask}
-                onCreateProfile={() => setShowProfileForm(true)}
-                loading={profilesLoading}
             />
 
             <MainLayout loading={tasksLoading}>
-                {/* No profiles state */}
-                {!profilesLoading && !hasProfiles && !showProfileForm && (
+                {/* Search Results Indicator */}
+                {searchQuery && (
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                            Showing results for:{' '}
+                            <strong>&quot;{searchQuery}&quot;</strong>
+                            {counts.total > 0 && (
+                                <span className="ml-2">
+                                    ({counts.total} task
+                                    {counts.total !== 1 ? 's' : ''})
+                                </span>
+                            )}
+                        </p>
+                    </div>
+                )}
+
+                {/* No Search Results */}
+                {searchQuery && counts.total === 0 && !tasksLoading && (
                     <EmptyState
-                        type="profiles"
-                        title="Welcome to Win List"
-                        description="Get started by creating your first profile to organize your tasks."
+                        type="search"
+                        title="No tasks found"
+                        description={`No tasks match "${searchQuery}". Try a different search term.`}
+                    />
+                )}
+
+                {/* Task Sections */}
+                {(!searchQuery || counts.total > 0) && (
+                    <div className="space-y-6">
+                        {/* Pending Tasks */}
+                        <TaskStatusSection
+                            status="PENDING"
+                            tasks={tasks.pending}
+                            categories={categories}
+                            count={counts.pending}
+                            onTaskClick={handleEditTask}
+                        />
+
+                        {/* In Progress Tasks */}
+                        <TaskStatusSection
+                            status="IN_PROGRESS"
+                            tasks={tasks.inProgress}
+                            categories={categories}
+                            count={counts.inProgress}
+                            onTaskClick={handleEditTask}
+                        />
+
+                        {/* Completed Tasks */}
+                        <TaskStatusSection
+                            status="COMPLETED"
+                            tasks={tasks.completed}
+                            categories={categories}
+                            count={counts.completed}
+                            onTaskClick={handleEditTask}
+                        />
+                    </div>
+                )}
+
+                {/* No Tasks at All (not searching) */}
+                {!searchQuery && counts.total === 0 && !tasksLoading && (
+                    <EmptyState
+                        type="tasks"
                         action={{
-                            label: 'Create Your First Profile',
-                            onClick: () => setShowProfileForm(true),
+                            label: 'Create Your First Task',
+                            onClick: handleNewTask,
                         }}
                     />
                 )}
-
-                {/* Main content when profiles exist */}
-                {hasProfiles && currentProfile && (
-                    <div className="space-y-6">
-                        {/* Search Results Header */}
-                        {searchQuery && (
-                            <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-lg font-semibold text-gray-900">
-                                            Search Results
-                                        </h2>
-                                        <p className="text-sm text-gray-600">
-                                            Found {counts.total} result
-                                            {counts.total !== 1 ? 's' : ''} for
-                                            &quot;{searchQuery}&quot;
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => setSearchQuery('')}
-                                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                    >
-                                        Clear search
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Task Sections */}
-                        {tasksError ? (
-                            <div className="bg-white border border-red-200 rounded-lg p-6 text-center">
-                                <p className="text-red-600 font-medium mb-2">
-                                    Failed to load tasks
-                                </p>
-                                <p className="text-sm text-gray-600 mb-4">
-                                    There was an error loading your tasks.
-                                    Please try again.
-                                </p>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                                >
-                                    Retry
-                                </button>
-                            </div>
-                        ) : searchQuery && counts.total === 0 ? (
-                            <EmptyState
-                                type="search"
-                                title="No tasks found"
-                                description={`No tasks match "${searchQuery}". Try a different search term.`}
-                            />
-                        ) : (
-                            <>
-                                <TaskStatusSection
-                                    status="PENDING"
-                                    tasks={tasks.pending}
-                                    categories={categories}
-                                    count={counts.pending}
-                                    onTaskClick={handleTaskClick}
-                                />
-
-                                <TaskStatusSection
-                                    status="IN_PROGRESS"
-                                    tasks={tasks.inProgress}
-                                    categories={categories}
-                                    count={counts.inProgress}
-                                    onTaskClick={handleTaskClick}
-                                />
-
-                                <TaskStatusSection
-                                    status="COMPLETED"
-                                    tasks={tasks.completed}
-                                    categories={categories}
-                                    count={counts.completed}
-                                    onTaskClick={handleTaskClick}
-                                />
-                            </>
-                        )}
-
-                        {/* No tasks message when no search and no tasks */}
-                        {!searchQuery && counts.total === 0 && (
-                            <EmptyState
-                                type="tasks"
-                                title="No tasks yet"
-                                description="Create your first task to get started organizing your work."
-                                action={{
-                                    label: 'Create Task',
-                                    onClick: handleNewTask,
-                                }}
-                            />
-                        )}
-                    </div>
-                )}
             </MainLayout>
 
-            {/* Profile Creation Modal */}
-            {showProfileForm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <ProfileCreateForm
-                        onSubmit={handleCreateProfile}
-                        onCancel={() => setShowProfileForm(false)}
-                        loading={createProfileMutation.isPending}
-                    />
-                </div>
-            )}
+            {/* Task Modal */}
+            <TaskModal
+                isOpen={isTaskModalOpen}
+                task={editingTask}
+                categories={categories}
+                profileId={currentProfile?.id || null}
+                onClose={handleCloseModal}
+                onSuccess={handleTaskSuccess}
+            />
         </div>
     );
 }
