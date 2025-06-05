@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Category } from '@/generated/prisma';
 import {
     Select,
@@ -52,8 +52,18 @@ export function CategorySelector({
     const createCategoryMutation = useCreateCategory();
 
     // Convert empty string to "none" for the Select component
+    // But also handle the case where value might be undefined/null
     const selectValue = value || 'none';
     const selectedCategory = categories.find((cat) => cat.id === value);
+
+    // Reset form when modal closes or value changes
+    useEffect(() => {
+        if (!showCreateForm) {
+            setNewCategoryName('');
+            setSelectedColor(PRESET_COLORS[0]);
+            setShowColorPicker(false);
+        }
+    }, [showCreateForm]);
 
     const handleCreateCategory = async () => {
         if (!newCategoryName.trim() || !profileId) return;
