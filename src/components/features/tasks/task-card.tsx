@@ -110,7 +110,7 @@ export function TaskCard({
                     )}
 
                     {/* Metadata Row */}
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {/* Category Badge */}
                         {category && (
                             <span
