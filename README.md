@@ -1,28 +1,59 @@
-# Win List
+# Win List - Personal Task Management App
 
-This is a TODO List app built with [Next.js](https://nextjs.org)
+A modern, full-stack task management application built with Next.js, TypeScript, and Prisma.
 
-## Getting Started
+## Prerequisites
 
-First, run the development server:
+-   Node.js 18+
+-   Yarn package manager
+-   PostgreSQL database (recommended: [NeonDB](https://neon.com/))
+-   Google OAuth credentials
+
+## Installation
+
+1. **Clone the repository**
+
+    ```bash
+    git clone
+    cd win-list
+    ```
+
+2. **Install dependencies**
+
+    ```bash
+    yarn install
+    ```
+
+3. **Set up environment variables**
+
+    Copy the .env.example file and fill in the variables
+
+## Database Setup
+
+1. **Create a PostgreSQL database**
+
+2. **Generate Prisma client**
+
+    ```bash
+    npx prisma generate
+    ```
+
+3. **Run database migrations**
+
+    ```bash
+    npx prisma db push
+    ```
+
+## Running the Application
+
+### Development Mode
 
 ```bash
-npm run dev
-# or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Testing
 
-## Notes
-
-Database service used (postgres) is [NeonDB](https://neon.com/)
-
-## Environment variables
-
-.env variables:
-See .env.example
+```bash
+yarn test
+```
