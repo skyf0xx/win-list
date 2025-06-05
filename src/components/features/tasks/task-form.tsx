@@ -71,7 +71,7 @@ export function TaskForm({
         }
         // Clear errors when initialData changes
         setErrors({});
-    }, [initialData]);
+    }, [initialData, categories]);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -99,7 +99,10 @@ export function TaskForm({
         const submitData: CreateTaskInput | UpdateTaskInput = {
             title: formData.title.trim(),
             description: formData.description.trim() || undefined,
-            categoryId: formData.categoryId || undefined,
+            categoryId:
+                formData.categoryId && formData.categoryId.trim() !== ''
+                    ? formData.categoryId
+                    : undefined,
             priority: formData.priority,
             status: formData.status,
             dueDate: formData.dueDate || undefined,
@@ -111,7 +114,7 @@ export function TaskForm({
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
 
-        // Clear error when user starts typing
+        // Clear error when user makes changes
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: '' }));
         }
