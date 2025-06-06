@@ -11,9 +11,9 @@ import { ErrorMessage } from '@/components/base/error-message';
 import { useCurrentProfile, useTasksByStatus } from '@/hooks/api';
 import { useCategories } from '@/hooks/api';
 import { TaskModal } from '@/components/features/tasks/task-modal';
-import { TaskStatusSection } from '@/components/features/tasks/task-status-section';
 import { ProfileCreationModal } from '@/components/features/profiles/profile-creation-modal';
 import { redirect } from 'next/navigation';
+import { TaskSections } from '@/components/features/tasks/task-sections';
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -205,31 +205,14 @@ export default function Dashboard() {
                 {/* Task Sections */}
                 {(!searchQuery || counts.total > 0) && (
                     <div className="space-y-6">
-                        {/* Pending Tasks */}
-                        <TaskStatusSection
-                            status="PENDING"
-                            tasks={tasks.pending}
+                        <TaskSections
+                            pendingTasks={tasks.pending}
+                            inProgressTasks={tasks.inProgress}
+                            completedTasks={tasks.completed}
                             categories={categories}
-                            count={counts.pending}
+                            counts={counts}
                             onTaskClick={handleEditTask}
-                        />
-
-                        {/* In Progress Tasks */}
-                        <TaskStatusSection
-                            status="IN_PROGRESS"
-                            tasks={tasks.inProgress}
-                            categories={categories}
-                            count={counts.inProgress}
-                            onTaskClick={handleEditTask}
-                        />
-
-                        {/* Completed Tasks */}
-                        <TaskStatusSection
-                            status="COMPLETED"
-                            tasks={tasks.completed}
-                            categories={categories}
-                            count={counts.completed}
-                            onTaskClick={handleEditTask}
+                            loading={tasksLoading}
                         />
                     </div>
                 )}
