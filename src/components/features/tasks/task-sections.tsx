@@ -34,6 +34,7 @@ interface TaskSectionsProps {
 }
 
 type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+const STATUS_VALUES: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
 
 export function TaskSections({
     pendingTasks,
@@ -75,6 +76,18 @@ export function TaskSections({
         return null;
     };
 
+    // Get tasks by status
+    const getTasksByStatus = (status: TaskStatus): Task[] => {
+        switch (status) {
+            case 'PENDING':
+                return pendingTasks;
+            case 'IN_PROGRESS':
+                return inProgressTasks;
+            case 'COMPLETED':
+                return completedTasks;
+        }
+    };
+
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
         setActiveId(active.id as string);
@@ -91,65 +104,72 @@ export function TaskSections({
 
         if (!over) return;
 
-        const taskId = active.id as string;
-        const task = findTask(taskId);
-        if (!task) return;
+        const activeTaskId = active.id as string;
+        const activeTask = findTask(activeTaskId);
+        if (!activeTask) return;
 
-        const currentStatus = getTaskStatus(taskId);
-        const newStatus = over.id as TaskStatus;
+        const overId = over.id as string;
+        const activeTaskStatus = getTaskStatus(activeTaskId);
+        if (!activeTaskStatus) return;
 
-        // If dropped on the same status section, handle reordering
-        if (currentStatus === newStatus) {
-            await handleReorder(event);
+        // Check if we're dropping on a status section (status change)
+        if (STATUS_VALUES.includes(overId as TaskStatus)) {
+            const newStatus = overId as TaskStatus;
+
+            // If status is different, change the task status
+            if (activeTaskStatus !== newStatus) {
+                try {
+                    await updateTaskMutation.mutateAsync({
+                        id: activeTaskId,
+                        data: { status: newStatus },
+                    });
+                } catch (error) {
+                    console.error('Failed to update task status:', error);
+                }
+            }
             return;
         }
 
-        // If dropped on different status section, change status
-        if (['PENDING', 'IN_PROGRESS', 'COMPLETED'].includes(newStatus)) {
-            try {
-                await updateTaskMutation.mutateAsync({
-                    id: taskId,
-                    data: { status: newStatus },
-                });
-            } catch (error) {
-                console.error('Failed to update task status:', error);
+        // Check if we're dropping on another task (reordering)
+        const overTask = findTask(overId);
+        if (overTask) {
+            const overTaskStatus = getTaskStatus(overId);
+
+            // Only reorder if both tasks are in the same status
+            if (activeTaskStatus === overTaskStatus) {
+                await handleReorder(activeTaskId, overId, activeTaskStatus);
+            } else if (overTaskStatus) {
+                // If different status and overTaskStatus is not null, change the active task's status
+                try {
+                    await updateTaskMutation.mutateAsync({
+                        id: activeTaskId,
+                        data: { status: overTaskStatus },
+                    });
+                } catch (error) {
+                    console.error('Failed to update task status:', error);
+                }
             }
         }
     };
 
-    const handleReorder = async (event: DragEndEvent) => {
-        const { active, over } = event;
+    const handleReorder = async (
+        activeTaskId: string,
+        overTaskId: string,
+        status: TaskStatus
+    ) => {
+        if (activeTaskId === overTaskId) return;
 
-        if (!over || active.id === over.id) return;
+        // Get the task list for the current status
+        const taskList = [...getTasksByStatus(status)];
 
-        const activeTask = findTask(active.id as string);
-        const overTask = findTask(over.id as string);
-
-        if (!activeTask || !overTask) return;
-
-        const currentStatus = getTaskStatus(active.id as string);
-        if (!currentStatus) return;
-
-        // Get the current task list for reordering
-        let taskList: Task[] = [];
-        switch (currentStatus) {
-            case 'PENDING':
-                taskList = [...pendingTasks];
-                break;
-            case 'IN_PROGRESS':
-                taskList = [...inProgressTasks];
-                break;
-            case 'COMPLETED':
-                taskList = [...completedTasks];
-                break;
-        }
-
-        // Sort by current sortOrder
+        // Sort by current sortOrder to ensure correct order
         taskList.sort((a, b) => a.sortOrder - b.sortOrder);
 
         // Find indices
-        const activeIndex = taskList.findIndex((task) => task.id === active.id);
-        const overIndex = taskList.findIndex((task) => task.id === over.id);
+        const activeIndex = taskList.findIndex(
+            (task) => task.id === activeTaskId
+        );
+        const overIndex = taskList.findIndex((task) => task.id === overTaskId);
 
         if (activeIndex === -1 || overIndex === -1) return;
 
@@ -158,7 +178,7 @@ export function TaskSections({
         const [movedTask] = reorderedTasks.splice(activeIndex, 1);
         reorderedTasks.splice(overIndex, 0, movedTask);
 
-        // Create bulk update data
+        // Create bulk update data with new sort orders
         const taskUpdates = reorderedTasks.map((task, index) => ({
             id: task.id,
             sortOrder: index,

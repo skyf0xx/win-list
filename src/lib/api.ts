@@ -23,6 +23,7 @@ async function apiRequest<T>(
 
     try {
         const response = await fetch(url, config);
+        console.log(`API request: ${endpoint}`, response);
         const result: ApiResponse<T> = await response.json();
 
         if (!result.success || !response.ok) {
@@ -193,7 +194,7 @@ export const taskApi = {
         updated: number;
         failed: number;
     }> =>
-        apiRequest('/tasks/bulk-update-order', {
+        apiRequest('/tasks/reorder', {
             method: 'POST',
             body: JSON.stringify(data),
         }),
