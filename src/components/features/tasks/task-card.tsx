@@ -4,6 +4,8 @@ import { Task, Category } from '@/generated/prisma';
 import { cn } from '@/lib/utils';
 import { Calendar, Clock, GripVertical } from 'lucide-react';
 import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TaskCardProps {
     task: Task;
@@ -11,6 +13,7 @@ interface TaskCardProps {
     onClick?: () => void;
     draggable?: boolean;
     className?: string;
+    isOverlay?: boolean; // For drag overlay
 }
 
 export function TaskCard({
@@ -19,7 +22,25 @@ export function TaskCard({
     onClick,
     draggable = true,
     className,
+    isOverlay = false,
 }: TaskCardProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: task.id,
+        disabled: !draggable,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
     const isOverdue =
         task.dueDate &&
         isPast(parseISO(task.dueDate.toString())) &&
@@ -57,12 +78,16 @@ export function TaskCard({
 
     return (
         <div
+            ref={setNodeRef}
+            style={style}
             className={cn(
                 'group relative bg-white border border-gray-200 rounded-lg p-4',
                 'hover:shadow-md hover:border-gray-300 transition-all duration-200',
                 'cursor-pointer select-none',
                 isOverdue && 'border-l-4 border-l-red-500',
                 isCompleted && 'opacity-60',
+                isDragging && 'opacity-50 z-50',
+                isOverlay && 'shadow-2xl rotate-3 scale-105',
                 className
             )}
             onClick={onClick}
@@ -71,12 +96,15 @@ export function TaskCard({
                 {/* Drag Handle */}
                 {draggable && (
                     <div
+                        {...attributes}
+                        {...listeners}
                         className={cn(
                             'flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100',
                             'transition-opacity duration-200 cursor-grab active:cursor-grabbing',
-                            'text-gray-400 hover:text-gray-600'
+                            'text-gray-400 hover:text-gray-600 touch-none',
+                            isDragging && 'opacity-100'
                         )}
-                        onMouseDown={(e) => e.stopPropagation()} // Prevent click when grabbing
+                        onClick={(e) => e.stopPropagation()} // Prevent card click when grabbing
                     >
                         <GripVertical className="h-4 w-4" />
                     </div>
@@ -91,7 +119,7 @@ export function TaskCard({
                             'truncate',
                             isCompleted && 'line-through text-gray-500'
                         )}
-                        title={task.title} // Tooltip for truncated text
+                        title={task.title}
                     >
                         {task.title}
                     </h3>
@@ -103,7 +131,7 @@ export function TaskCard({
                                 'text-xs text-gray-600 mt-1 line-clamp-2',
                                 isCompleted && 'text-gray-400'
                             )}
-                            title={task.description} // Tooltip for truncated text
+                            title={task.description}
                         >
                             {task.description}
                         </p>

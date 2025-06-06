@@ -8,10 +8,11 @@ import { userService } from '@/lib/db';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid user ID format'),
@@ -19,7 +20,7 @@ export async function GET(
             );
         }
 
-        const user = await userService.getById(params.id);
+        const user = await userService.getById(id);
         if (!user) {
             return NextResponse.json(createErrorResponse('User not found'), {
                 status: 404,
@@ -38,10 +39,11 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid user ID format'),
@@ -64,7 +66,7 @@ export async function PUT(
             );
         }
 
-        const user = await userService.update(params.id, validation.data);
+        const user = await userService.update(id, validation.data);
         return NextResponse.json(
             createSuccessResponse(user, 'User updated successfully')
         );
@@ -80,10 +82,11 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid user ID format'),
@@ -91,7 +94,7 @@ export async function DELETE(
             );
         }
 
-        const user = await userService.delete(params.id);
+        const user = await userService.delete(id);
         return NextResponse.json(
             createSuccessResponse(user, 'User deleted successfully')
         );

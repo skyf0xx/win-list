@@ -5,6 +5,7 @@ import { TaskList } from './task-list';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 
 type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
@@ -61,6 +62,10 @@ export function TaskStatusSection({
         status === 'COMPLETED' && tasks.length > 3
     );
 
+    const { setNodeRef, isOver } = useDroppable({
+        id: status,
+    });
+
     const isCollapsed = onToggleCollapse ? collapsed : internalCollapsed;
     const handleToggleCollapse =
         onToggleCollapse || (() => setInternalCollapsed(!internalCollapsed));
@@ -73,9 +78,11 @@ export function TaskStatusSection({
 
     return (
         <section
+            ref={setNodeRef}
             className={cn(
-                'bg-white border rounded-lg overflow-hidden',
+                'bg-white border rounded-lg overflow-hidden transition-all duration-200',
                 config.borderColor,
+                isOver && 'ring-2 ring-blue-500 ring-opacity-50 bg-blue-50/30',
                 className
             )}
         >
@@ -84,7 +91,8 @@ export function TaskStatusSection({
                 className={cn(
                     'px-4 py-3 border-b flex items-center justify-between',
                     config.bgColor,
-                    config.borderColor
+                    config.borderColor,
+                    isOver && 'bg-blue-100'
                 )}
             >
                 <div className="flex items-center gap-2">
@@ -101,6 +109,11 @@ export function TaskStatusSection({
                     >
                         {count}
                     </span>
+                    {isOver && (
+                        <span className="text-sm text-blue-600 font-medium">
+                            Drop here
+                        </span>
+                    )}
                 </div>
 
                 {/* Collapse Toggle for Completed */}
@@ -124,7 +137,12 @@ export function TaskStatusSection({
             </div>
 
             {/* Section Content */}
-            <div className="p-4">
+            <div
+                className={cn(
+                    'p-4 transition-colors duration-200',
+                    isOver && 'bg-blue-50/30'
+                )}
+            >
                 {tasks.length === 0 ? (
                     /* Empty State */
                     <div className="text-center py-8">
@@ -134,6 +152,11 @@ export function TaskStatusSection({
                         <p className="text-sm text-gray-500">
                             {config.emptyDescription}
                         </p>
+                        {isOver && (
+                            <p className="text-sm text-blue-600 font-medium mt-2">
+                                Drop task here to change status
+                            </p>
+                        )}
                     </div>
                 ) : (
                     <>

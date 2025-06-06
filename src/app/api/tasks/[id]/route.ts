@@ -9,10 +9,11 @@ import type { Prisma } from '@/generated/prisma';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid task ID format'),
@@ -20,7 +21,7 @@ export async function GET(
             );
         }
 
-        const task = await taskService.getById(params.id);
+        const task = await taskService.getById(id);
         if (!task) {
             return NextResponse.json(createErrorResponse('Task not found'), {
                 status: 404,
@@ -39,10 +40,11 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid task ID format'),
@@ -88,7 +90,7 @@ export async function PUT(
             }
         }
 
-        const task = await taskService.update(params.id, updateData);
+        const task = await taskService.update(id, updateData);
         return NextResponse.json(
             createSuccessResponse(task, 'Task updated successfully')
         );
@@ -103,10 +105,11 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid task ID format'),
@@ -114,9 +117,9 @@ export async function DELETE(
             );
         }
 
-        const task = await taskService.delete(params.id);
+        await taskService.delete(id);
         return NextResponse.json(
-            createSuccessResponse(task, 'Task deleted successfully')
+            createSuccessResponse(id, 'Task deleted successfully')
         );
     } catch (error) {
         if (process.env.NODE_ENV !== 'test')
