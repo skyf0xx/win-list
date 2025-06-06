@@ -5,7 +5,7 @@ This is a list of features that I would like to add to this project in the futur
 -   [ ] Cleaner error responses from API. E.g. user already exists instead of generic responses
 -   [ ] Add toast for confirmations
 -   [ ] Audit security (users should only be able to access their data) - use sessions, might affect tests
--   [ ] Add a production database
+-   [x] Add a test database
 -   [ ] Complete tests for all endpoints
 -   [ ] Replace console.log with logger for better logging
 -   [ ] Github actions to run tests/ check linting on push
