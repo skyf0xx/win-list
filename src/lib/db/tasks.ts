@@ -26,6 +26,44 @@ interface TaskSortOptions {
     direction: 'asc' | 'desc';
 }
 
+function getStatusSearchConditions(
+    searchTerm: string
+): Prisma.TaskWhereInput[] {
+    const normalizedSearch = searchTerm.toLowerCase().trim();
+    const statusConditions: Prisma.TaskWhereInput[] = [];
+
+    // Map search terms to actual status values
+    const statusMappings = {
+        pending: 'PENDING',
+        pend: 'PENDING',
+        todo: 'PENDING',
+        'to do': 'PENDING',
+        progress: 'IN_PROGRESS',
+        'in progress': 'IN_PROGRESS',
+        inprogress: 'IN_PROGRESS',
+        active: 'IN_PROGRESS',
+        working: 'IN_PROGRESS',
+        doing: 'IN_PROGRESS',
+        completed: 'COMPLETED',
+        complete: 'COMPLETED',
+        done: 'COMPLETED',
+        finished: 'COMPLETED',
+        finish: 'COMPLETED',
+    } as const;
+
+    // Check if search term matches any status keywords
+    for (const [keyword, status] of Object.entries(statusMappings)) {
+        if (
+            keyword.includes(normalizedSearch) ||
+            normalizedSearch.includes(keyword)
+        ) {
+            statusConditions.push({ status: status as TaskStatus });
+        }
+    }
+
+    return statusConditions;
+}
+
 export const taskService = {
     async create(data: Prisma.TaskCreateInput): Promise<Task> {
         // Get the highest sort order for this profile and increment
@@ -94,6 +132,7 @@ export const taskService = {
                             },
                         },
                     },
+                    ...getStatusSearchConditions(filters.search),
                 ],
             }),
             ...(filters?.dueDateFrom && {
@@ -163,6 +202,7 @@ export const taskService = {
                             name: { contains: searchTerm, mode: 'insensitive' },
                         },
                     },
+                    ...getStatusSearchConditions(searchTerm),
                 ],
                 ...(filters?.status && { status: filters.status }),
                 ...(filters?.categoryId && { categoryId: filters.categoryId }),
