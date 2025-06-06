@@ -12,6 +12,7 @@ const config: Config = {
         '^@/(.*)$': '<rootDir>/src/$1',
     },
     setupFilesAfterEnv: ['<rootDir>/__tests__/jest.setup.ts'],
+    setupFiles: ['<rootDir>/jest.env.js'],
     testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
     maxWorkers: 1, // tests need to run sequentially e.g. add user before updating
     clearMocks: true,
