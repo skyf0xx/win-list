@@ -8,10 +8,11 @@ import { categoryService } from '@/lib/db';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid category ID format'),
@@ -19,7 +20,7 @@ export async function GET(
             );
         }
 
-        const category = await categoryService.getById(params.id);
+        const category = await categoryService.getById(id);
         if (!category) {
             return NextResponse.json(
                 createErrorResponse('Category not found'),
@@ -45,10 +46,11 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid category ID format'),
@@ -70,10 +72,7 @@ export async function PUT(
             );
         }
 
-        const category = await categoryService.update(
-            params.id,
-            validation.data
-        );
+        const category = await categoryService.update(id, validation.data);
         return NextResponse.json(
             createSuccessResponse(category, 'Category updated successfully')
         );
@@ -89,10 +88,11 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const idValidation = idParamSchema.safeParse({ id: params.id });
+        const { id } = await params;
+        const idValidation = idParamSchema.safeParse({ id });
         if (!idValidation.success) {
             return NextResponse.json(
                 createErrorResponse('Invalid category ID format'),
@@ -100,7 +100,7 @@ export async function DELETE(
             );
         }
 
-        const category = await categoryService.delete(params.id);
+        const category = await categoryService.delete(id);
         return NextResponse.json(
             createSuccessResponse(category, 'Category deleted successfully')
         );
