@@ -3,6 +3,10 @@
 import { Task, Category } from '@/generated/prisma';
 import { TaskCard } from './task-card';
 import { cn } from '@/lib/utils';
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface TaskListProps {
     tasks: Task[];
@@ -37,21 +41,45 @@ export function TaskList({
         );
     }
 
+    // Sort tasks by sortOrder for consistent drag and drop
+    const sortedTasks = [...tasks].sort((a, b) => a.sortOrder - b.sortOrder);
+
     return (
         <div className={cn('space-y-3', className)}>
-            {tasks.map((task) => (
-                <TaskCard
-                    key={task.id}
-                    task={task}
-                    category={
-                        task.categoryId
-                            ? categoryMap.get(task.categoryId)
-                            : undefined
-                    }
-                    onClick={() => onTaskClick?.(task)}
-                    draggable={draggable}
-                />
-            ))}
+            {draggable ? (
+                <SortableContext
+                    items={sortedTasks.map((task) => task.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    {sortedTasks.map((task) => (
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                            category={
+                                task.categoryId
+                                    ? categoryMap.get(task.categoryId)
+                                    : undefined
+                            }
+                            onClick={() => onTaskClick?.(task)}
+                            draggable={draggable}
+                        />
+                    ))}
+                </SortableContext>
+            ) : (
+                sortedTasks.map((task) => (
+                    <TaskCard
+                        key={task.id}
+                        task={task}
+                        category={
+                            task.categoryId
+                                ? categoryMap.get(task.categoryId)
+                                : undefined
+                        }
+                        onClick={() => onTaskClick?.(task)}
+                        draggable={false}
+                    />
+                ))
+            )}
         </div>
     );
 }
