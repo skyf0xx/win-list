@@ -8,12 +8,12 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, X } from 'lucide-react';
+import { Search, Plus, X, LogOut, User, ChevronDown } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { LoadingSkeleton } from '@/components/base/loading-skeleton';
 import { cn } from '@/lib/utils';
+import { signOut, useSession } from 'next-auth/react';
 
 interface AppHeaderProps {
     profiles: Profile[];
@@ -37,6 +37,8 @@ export function AppHeader({
     loading = false,
 }: AppHeaderProps) {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isSigningOut, setIsSigningOut] = useState(false);
+    const { data: session } = useSession();
 
     const currentProfile = profiles.find((p) => p.id === currentProfileId);
 
@@ -45,9 +47,17 @@ export function AppHeader({
     }, [onSearchChange]);
 
     const handleProfileSelect = useCallback(
-        (value: string) => {
+        async (value: string) => {
             if (value === 'create-new' && onCreateProfile) {
                 onCreateProfile();
+            } else if (value === 'sign-out') {
+                setIsSigningOut(true);
+                try {
+                    await signOut({ callbackUrl: '/' });
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    setIsSigningOut(false);
+                }
             } else {
                 onProfileChange(value);
             }
@@ -74,20 +84,36 @@ export function AppHeader({
         [onNewTask]
     );
 
+    // Generate user initials for avatar
+    const getUserInitials = () => {
+        if (!session?.user?.name) return 'U';
+        const names = session.user.name.split(' ');
+        if (names.length >= 2) {
+            return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+        }
+        return names[0][0].toUpperCase();
+    };
+
     if (loading) {
         return (
             <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
                 <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center gap-4">
-                        <LoadingSkeleton variant="profile" />
+                    <div className="flex items-center justify-between">
+                        <LoadingSkeleton variant="text" className="w-32" />
                         <LoadingSkeleton
                             variant="text"
-                            className="flex-1 max-w-md"
+                            className="flex-1 max-w-md mx-4"
                         />
-                        <LoadingSkeleton
-                            variant="circle"
-                            className="w-24 h-10"
-                        />
+                        <div className="flex items-center gap-3">
+                            <LoadingSkeleton
+                                variant="circle"
+                                className="w-24 h-10"
+                            />
+                            <LoadingSkeleton
+                                variant="circle"
+                                className="w-10 h-10 rounded-full"
+                            />
+                        </div>
                     </div>
                 </div>
             </header>
@@ -100,78 +126,16 @@ export function AppHeader({
             onKeyDown={handleKeyDown}
         >
             <div className="container mx-auto px-4 py-3">
-                <div className="flex items-center gap-4">
-                    {/* Profile Selector */}
+                <div className="flex items-center justify-between">
+                    {/* App Logo/Brand (Left Side) */}
                     <div className="flex-shrink-0">
-                        <Select
-                            value={currentProfileId || ''}
-                            onValueChange={handleProfileSelect}
-                        >
-                            <SelectTrigger className="w-[180px] bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                <SelectValue placeholder="Select profile">
-                                    {currentProfile ? (
-                                        <div className="flex items-center gap-2">
-                                            {currentProfile.color && (
-                                                <div
-                                                    className="w-3 h-3 rounded-full flex-shrink-0"
-                                                    style={{
-                                                        backgroundColor:
-                                                            currentProfile.color,
-                                                    }}
-                                                />
-                                            )}
-                                            <span className="truncate">
-                                                {currentProfile.name}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        'Select profile'
-                                    )}
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {profiles.map((profile) => (
-                                    <SelectItem
-                                        key={profile.id}
-                                        value={profile.id}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {profile.color && (
-                                                <div
-                                                    className="w-3 h-3 rounded-full flex-shrink-0"
-                                                    style={{
-                                                        backgroundColor:
-                                                            profile.color,
-                                                    }}
-                                                />
-                                            )}
-                                            <span className="truncate">
-                                                {profile.name}
-                                            </span>
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                                {/* Create New Profile Option */}
-                                {onCreateProfile && (
-                                    <>
-                                        <div className="h-px bg-gray-200 my-1" />
-                                        <SelectItem
-                                            value="create-new"
-                                            className="text-blue-600 focus:text-blue-600 focus:bg-blue-50"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <Plus className="w-3 h-3" />
-                                                <span>Create New Profile</span>
-                                            </div>
-                                        </SelectItem>
-                                    </>
-                                )}
-                            </SelectContent>
-                        </Select>
+                        <h1 className="text-xl font-semibold text-gray-900">
+                            Win List
+                        </h1>
                     </div>
 
-                    {/* Search Bar */}
-                    <div className="flex-1 max-w-md">
+                    {/* Search Bar (Center) */}
+                    <div className="flex-1 max-w-md mx-8">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <Input
@@ -187,12 +151,14 @@ export function AppHeader({
                                     (isSearchFocused || searchQuery) &&
                                         'ring-2 ring-blue-500/20'
                                 )}
+                                disabled={isSigningOut}
                             />
                             {searchQuery && (
                                 <button
                                     onClick={handleClearSearch}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                     aria-label="Clear search"
+                                    disabled={isSigningOut}
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -200,22 +166,151 @@ export function AppHeader({
                         </div>
                     </div>
 
-                    {/* New Task Button */}
-                    <div className="flex-shrink-0">
+                    {/* Right Side Actions */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                        {/* New Task Button */}
                         <Button
                             onClick={onNewTask}
-                            disabled={!currentProfileId}
+                            disabled={!currentProfileId || isSigningOut}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 gap-2"
                             title="Create new task (⌘N)"
                         >
                             <Plus className="h-4 w-4" />
                             <span className="hidden sm:inline">New Task</span>
                         </Button>
+
+                        {/* Profile Selector */}
+                        <Select
+                            value={currentProfileId || ''}
+                            onValueChange={handleProfileSelect}
+                            disabled={isSigningOut}
+                        >
+                            <SelectTrigger className="w-auto border-none bg-transparent hover:bg-gray-50 focus:bg-gray-50 focus:ring-0 focus:ring-offset-0 p-2">
+                                <div className="flex items-center gap-2">
+                                    {/* User Avatar */}
+                                    <div className="relative">
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                                            style={{
+                                                backgroundColor:
+                                                    currentProfile?.color ||
+                                                    '#3B82F6', // Default to blue if no profile color
+                                            }}
+                                        >
+                                            {getUserInitials()}
+                                        </div>
+
+                                        {/* Profile Color Indicator */}
+                                        {currentProfile?.color && (
+                                            <div
+                                                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white"
+                                                style={{
+                                                    backgroundColor:
+                                                        currentProfile.color,
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {/* Profile Name & Chevron */}
+                                    <div className="hidden sm:flex items-center gap-1">
+                                        <span className="text-sm font-medium text-gray-700 max-w-[120px] truncate">
+                                            {currentProfile?.name ||
+                                                'Select profile'}
+                                        </span>
+                                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                                    </div>
+
+                                    {/* Mobile: Just chevron */}
+                                    <div className="sm:hidden">
+                                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </div>
+                            </SelectTrigger>
+
+                            <SelectContent align="end" className="w-56">
+                                {/* User Info Header */}
+                                {session?.user && (
+                                    <>
+                                        <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
+                                            <div className="flex items-center gap-2">
+                                                <User className="w-3 h-3" />
+                                                <span className="truncate">
+                                                    {session.user.name ||
+                                                        session.user.email}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Profiles Section */}
+                                <div className="py-1">
+                                    {profiles.map((profile) => (
+                                        <SelectItem
+                                            key={profile.id}
+                                            value={profile.id}
+                                            className="cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-3 w-full">
+                                                <div
+                                                    className="w-3 h-3 rounded-full flex-shrink-0"
+                                                    style={{
+                                                        backgroundColor:
+                                                            profile.color ||
+                                                            '#6B7280',
+                                                    }}
+                                                />
+                                                <span className="truncate flex-1">
+                                                    {profile.name}
+                                                </span>
+                                                {profile.id ===
+                                                    currentProfileId && (
+                                                    <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0" />
+                                                )}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </div>
+
+                                {/* Actions Section */}
+                                <div className="border-t border-gray-100 pt-1">
+                                    {/* Create New Profile Option */}
+                                    {onCreateProfile && (
+                                        <SelectItem
+                                            value="create-new"
+                                            className="text-blue-600 focus:text-blue-600 focus:bg-blue-50 cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Plus className="w-4 h-4" />
+                                                <span>Create New Profile</span>
+                                            </div>
+                                        </SelectItem>
+                                    )}
+
+                                    {/* Sign Out Option */}
+                                    <SelectItem
+                                        value="sign-out"
+                                        className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                        disabled={isSigningOut}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <LogOut className="w-4 h-4" />
+                                            <span>
+                                                {isSigningOut
+                                                    ? 'Signing out...'
+                                                    : 'Sign Out'}
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                </div>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
                 {/* Mobile Search Results Indicator */}
-                <div className="md:hidden">
+                <div className="sm:hidden">
                     {searchQuery && (
                         <div className="mt-3 px-1">
                             <div className="text-sm text-gray-600">
@@ -226,6 +321,7 @@ export function AppHeader({
                                 <button
                                     onClick={handleClearSearch}
                                     className="ml-2 text-blue-600 hover:text-blue-700 font-medium"
+                                    disabled={isSigningOut}
                                 >
                                     Clear
                                 </button>
