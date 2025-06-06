@@ -86,6 +86,14 @@ export const taskService = {
                             mode: 'insensitive',
                         },
                     },
+                    {
+                        category: {
+                            name: {
+                                contains: filters.search,
+                                mode: 'insensitive',
+                            },
+                        },
+                    },
                 ],
             }),
             ...(filters?.dueDateFrom && {
@@ -148,6 +156,11 @@ export const taskService = {
                         description: {
                             contains: searchTerm,
                             mode: 'insensitive',
+                        },
+                    },
+                    {
+                        category: {
+                            name: { contains: searchTerm, mode: 'insensitive' },
                         },
                     },
                 ],
