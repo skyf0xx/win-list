@@ -26,7 +26,7 @@ A modern, full-stack task management application built with Next.js, TypeScript,
 
 3. **Set up environment variables**
 
-    Copy the .env.example file and fill in the variables and duplicate to .env and .env.test with appropriate values.
+    Copy the [.env.example](.env.example) file and fill in the variables and duplicate to .env and .env.test with appropriate values.
 
 ## Database Setup
 
@@ -44,7 +44,7 @@ A modern, full-stack task management application built with Next.js, TypeScript,
     npx prisma db push
     ```
 
-    Note: To run tests, you will also need to puch to the test database. (See scripts in package.json)
+    Note: To run tests, you will also need to push to the test database. (See scripts in package.json)
 
 ## Running the Application
 
@@ -59,3 +59,7 @@ yarn dev
 ```bash
 yarn test
 ```
+
+### Development
+
+See [TODO.md](TODO.md) for suggested future improvements
