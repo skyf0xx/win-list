@@ -44,7 +44,9 @@ A modern, full-stack task management application built with Next.js, TypeScript,
     npx prisma db push
     ```
 
-    Note: To run tests, you will also need to push to the test database. (See scripts in package.json)
+    **Note**: To run tests, you will also need to push to the test database. Running on prod will truncate all tables!!
+
+    (See scripts in [package.json](package.json))
 
 ## Running the Application
 
