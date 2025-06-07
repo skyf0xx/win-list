@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
     createTaskSchema,
+    paginationSchema,
     taskFilterSchema,
     taskSortSchema,
 } from '@/lib/validations';
@@ -9,12 +10,6 @@ import {
     createErrorResponse,
 } from '@/lib/validations/api';
 import { taskService } from '@/lib/db';
-import { z } from 'zod';
-
-const paginationSchema = z.object({
-    limit: z.coerce.number().positive().optional(),
-    offset: z.coerce.number().min(0).optional(),
-});
 
 export async function GET(request: NextRequest) {
     try {
