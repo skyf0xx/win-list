@@ -1,17 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { taskFilterSchema } from '@/lib/validations';
+import { searchTasksSchema } from '@/lib/validations';
 import {
     createSuccessResponse,
     createErrorResponse,
 } from '@/lib/validations/api';
 import { taskService } from '@/lib/db';
-import { z } from 'zod';
-
-const searchTasksSchema = z.object({
-    userId: z.string().uuid('Invalid user ID'),
-    query: z.string().min(1, 'Search query is required'),
-    filters: taskFilterSchema.omit({ search: true }).optional(),
-});
 
 export async function POST(request: NextRequest) {
     try {
