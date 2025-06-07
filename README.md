@@ -26,7 +26,7 @@ A modern, full-stack task management application built with Next.js, TypeScript,
 
 3. **Set up environment variables**
 
-    Copy the [.env.example](.env.example) file and fill in the variables and duplicate to .env and .env.test with appropriate values.
+    Copy the [.env.example](.env.example) file and fill in the variables and duplicate to `.env` and `.env.test` with appropriate values.
 
 ## Database Setup
 
