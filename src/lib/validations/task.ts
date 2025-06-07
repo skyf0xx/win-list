@@ -92,6 +92,12 @@ export const paginationSchema = z
         offset: data.offset || undefined,
     }));
 
+export const searchTasksSchema = z.object({
+    userId: z.string().uuid('Invalid user ID'),
+    query: z.string().min(1, 'Search query is required'),
+    filters: taskFilterSchema.omit({ search: true }).optional(),
+});
+
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type UpdateTaskStatusInput = z.infer<typeof updateTaskStatusSchema>;
