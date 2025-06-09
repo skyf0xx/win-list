@@ -165,7 +165,7 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 max-w-4xl mx-auto">
             <AppHeader
                 profiles={profiles}
                 currentProfileId={currentProfileId}
