@@ -195,13 +195,6 @@ export function TaskCard({
                     </div>
                 )}
             </div>
-
-            {/* Status Indicator for completed tasks */}
-            {isCompleted && (
-                <div className="absolute top-2 right-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                </div>
-            )}
         </div>
     );
 }
