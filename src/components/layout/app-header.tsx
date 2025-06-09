@@ -9,7 +9,7 @@ import {
     SelectItem,
     SelectTrigger,
 } from '@/components/ui/select';
-import { Search, Plus, X, LogOut, User, ChevronDown } from 'lucide-react';
+import { Search, Plus, X, LogOut, User } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { LoadingSkeleton } from '@/components/base/loading-skeleton';
 import { cn } from '@/lib/utils';
@@ -218,12 +218,6 @@ export function AppHeader({
                                             {currentProfile?.name ||
                                                 'Select profile'}
                                         </span>
-                                        <ChevronDown className="h-4 w-4 text-gray-400" />
-                                    </div>
-
-                                    {/* Mobile: Just chevron */}
-                                    <div className="sm:hidden">
-                                        <ChevronDown className="h-4 w-4 text-gray-400" />
                                     </div>
                                 </div>
                             </SelectTrigger>
