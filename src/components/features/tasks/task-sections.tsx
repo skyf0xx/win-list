@@ -1,6 +1,6 @@
 'use client';
 
-import { Task, Category } from '@/generated/prisma';
+import { Task, Category, TaskStatus } from '@/generated/prisma';
 import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,9 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
+    CollisionDetection,
+    pointerWithin,
+    rectIntersection,
 } from '@dnd-kit/core';
 import { useState } from 'react';
 import { useUpdateTask, useBulkUpdateTaskOrder } from '@/hooks/api';
@@ -33,7 +36,6 @@ interface TaskSectionsProps {
     className?: string;
 }
 
-type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 const STATUS_VALUES: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
 
 export function TaskSections({
@@ -60,6 +62,38 @@ export function TaskSections({
             },
         })
     );
+
+    const collisionDetection: CollisionDetection = (args) => {
+        const pointerCollisions = pointerWithin(args);
+        const intersectionCollisions = rectIntersection(args);
+
+        // Combine and deduplicate collisions
+        const allCollisions = [...pointerCollisions, ...intersectionCollisions];
+        const uniqueCollisions = Array.from(
+            new Map(
+                allCollisions.map((collision) => [collision.id, collision])
+            ).values()
+        );
+
+        if (uniqueCollisions.length === 0) {
+            return closestCenter(args);
+        }
+
+        // Prioritize task IDs over status IDs (i.e. task order over status changes)
+        const taskCollisions = uniqueCollisions.filter(
+            (collision) => !STATUS_VALUES.includes(collision.id as TaskStatus)
+        );
+
+        // If we have task collisions, prefer those for reordering
+        if (taskCollisions.length > 0) {
+            return taskCollisions;
+        }
+
+        // Otherwise, return status collisions for status changes
+        return uniqueCollisions.filter((collision) =>
+            STATUS_VALUES.includes(collision.id as TaskStatus)
+        );
+    };
 
     // Find task by ID across all sections
     const findTask = (id: string): Task | undefined => {
@@ -112,38 +146,39 @@ export function TaskSections({
         const activeTaskStatus = getTaskStatus(activeTaskId);
         if (!activeTaskStatus) return;
 
-        // Check if we're dropping on a status section (status change)
+        // prioritize task order over status change
+        const overTask = findTask(overId);
+        if (overTask) {
+            const overTaskStatus = getTaskStatus(overId);
+
+            // If same status, reorder within that status
+            if (activeTaskStatus === overTaskStatus) {
+                await handleReorder(activeTaskId, overId, activeTaskStatus);
+                return; // Early return to prevent status change
+            }
+            // If different status, change the active task's status to match the target task
+            else if (overTaskStatus) {
+                try {
+                    await updateTaskMutation.mutateAsync({
+                        id: activeTaskId,
+                        data: { status: overTaskStatus },
+                    });
+                } catch (error) {
+                    console.error('Failed to update task status:', error);
+                }
+                return;
+            }
+        }
+
         if (STATUS_VALUES.includes(overId as TaskStatus)) {
             const newStatus = overId as TaskStatus;
 
-            // If status is different, change the task status
+            // Only change status if it's different
             if (activeTaskStatus !== newStatus) {
                 try {
                     await updateTaskMutation.mutateAsync({
                         id: activeTaskId,
                         data: { status: newStatus },
-                    });
-                } catch (error) {
-                    console.error('Failed to update task status:', error);
-                }
-            }
-            return;
-        }
-
-        // Check if we're dropping on another task (reordering)
-        const overTask = findTask(overId);
-        if (overTask) {
-            const overTaskStatus = getTaskStatus(overId);
-
-            // Only reorder if both tasks are in the same status
-            if (activeTaskStatus === overTaskStatus) {
-                await handleReorder(activeTaskId, overId, activeTaskStatus);
-            } else if (overTaskStatus) {
-                // If different status and overTaskStatus is not null, change the active task's status
-                try {
-                    await updateTaskMutation.mutateAsync({
-                        id: activeTaskId,
-                        data: { status: overTaskStatus },
                     });
                 } catch (error) {
                     console.error('Failed to update task status:', error);
@@ -207,7 +242,7 @@ export function TaskSections({
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={collisionDetection}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
