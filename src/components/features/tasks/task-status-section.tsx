@@ -1,13 +1,11 @@
 'use client';
 
-import { Task, Category } from '@/generated/prisma';
+import { Task, Category, TaskStatus } from '@/generated/prisma';
 import { TaskList } from './task-list';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
-
-type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 interface TaskStatusSectionProps {
     status: TaskStatus;
