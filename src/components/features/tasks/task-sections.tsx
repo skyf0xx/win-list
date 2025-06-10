@@ -1,6 +1,6 @@
 'use client';
 
-import { Task, Category } from '@/generated/prisma';
+import { Task, Category, TaskStatus } from '@/generated/prisma';
 import { TaskStatusSection } from './task-status-section';
 import { TaskCard } from './task-card';
 import { cn } from '@/lib/utils';
@@ -36,7 +36,6 @@ interface TaskSectionsProps {
     className?: string;
 }
 
-type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 const STATUS_VALUES: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
 
 export function TaskSections({

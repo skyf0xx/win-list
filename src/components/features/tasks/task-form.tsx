@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Task, Category } from '@/generated/prisma';
+import { Task, Category, TaskStatus } from '@/generated/prisma';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,8 +26,6 @@ interface TaskFormProps {
     onSubmit: (data: CreateTaskInput | UpdateTaskInput) => void;
     loading?: boolean;
 }
-
-type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export function TaskForm({
     initialData,
